@@ -14,21 +14,6 @@
                     Upload new legacy HRIS, CRM, or Payroll files (CSV / Excel), or test with pre-planted sample fixtures.
                 </p>
             </div>
-            <div class="flex items-center gap-2">
-                <button 
-                    hx-post="/api/db/reset"
-                    hx-confirm="Are you sure you want to reset the database? This clears all past runs, events, and escalations."
-                    hx-target="#run-container"
-                    hx-swap="outerHTML"
-                    class="px-3.5 py-2 bg-error/10 hover:bg-error/20 text-error text-xs font-semibold rounded-xl border border-error/20 transition flex items-center gap-1.5 cursor-pointer">
-                    <span class="material-symbols-outlined text-[15px]">delete_sweep</span>
-                    <span>Clear Database</span>
-                </button>
-                <a href="/queue" class="px-3.5 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-xl border border-outline-variant/30 transition flex items-center gap-1">
-                    <span>Review Queue</span>
-                    <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
-                </a>
-            </div>
         </div>
 
         <!-- File Upload Form -->

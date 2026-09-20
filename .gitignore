@@ -40,3 +40,7 @@ htmlcov/
 .DS_Store
 .idea/
 .vscode/
+
+# Runtime uploads
+uploads/*
+!uploads/.gitkeep

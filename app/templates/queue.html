@@ -16,10 +16,6 @@
             <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-800 border border-amber-500/30">
                 {{ escalations|selectattr('status', 'equalto', 'pending')|list|length }} Pending Items
             </span>
-            <a href="/" class="px-4 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-xl border border-outline-variant/30 transition flex items-center gap-1">
-                <span class="material-symbols-outlined text-[15px]">arrow_back</span>
-                <span>Run Monitor</span>
-            </a>
         </div>
     </div>
 
