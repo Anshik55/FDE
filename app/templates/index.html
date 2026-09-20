@@ -107,6 +107,15 @@
     </script>
 
     <div id="run-container" class="space-y-6">
+        {% if banner_msg %}
+        <div class="p-3.5 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs flex items-center justify-between shadow-sm">
+            <span class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-primary"></span>
+                <span class="font-medium">{{ banner_msg }}</span>
+            </span>
+            <span class="font-mono text-[11px] font-semibold">Run: {{ run_id }}</span>
+        </div>
+        {% endif %}
         <!-- Live Metrics Cards -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
@@ -244,24 +253,24 @@
             if (bar) bar.style.width = '80%';
             if (progressText) progressText.textContent = '80% (Paused for Review)';
             if (statusBadge) {
-                statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse';
-                statusBadge.innerHTML = '<span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping mr-1"></span> ⏸️ PAUSED: Human Review Required';
+                statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 animate-pulse';
+                statusBadge.innerHTML = '<span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping mr-1"></span> ⏸️ PAUSED: Human Review Required';
             }
             for (let i = 1; i <= totalStages; i++) {
                 const card = document.getElementById(`stage-card-${i}`);
                 const badge = document.getElementById(`stage-badge-${i}`);
                 if (!card || !badge) continue;
                 if (i < 5) {
-                    card.className = 'stage-step-card p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-950/25 text-emerald-200 transition-all duration-300 shadow-sm';
-                    badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                    card.className = 'stage-step-card p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.07] text-on-surface transition-all duration-300 shadow-sm flex flex-col justify-between';
+                    badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30';
                     badge.innerHTML = '✓ Done';
                 } else if (i === 5) {
-                    card.className = 'stage-step-card p-3.5 rounded-xl border-2 border-amber-500 bg-amber-950/40 text-amber-100 ring-2 ring-amber-500/30 shadow-lg shadow-amber-500/20 transition-all duration-300 transform scale-[1.02]';
-                    badge.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/30 text-amber-200 border border-amber-400/50 animate-pulse';
-                    badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping mr-1"></span> ⏸️ Paused';
+                    card.className = 'stage-step-card p-3.5 rounded-xl border-2 border-amber-500 bg-amber-500/[0.08] text-on-surface ring-2 ring-amber-500/20 shadow-md transition-all duration-300 transform scale-[1.01] flex flex-col justify-between';
+                    badge.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 animate-pulse';
+                    badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping mr-1"></span> ⏸️ Paused';
                 } else {
-                    card.className = 'stage-step-card p-3.5 rounded-xl border border-gray-800 bg-gray-950/60 text-gray-500 opacity-60 transition-all duration-300';
-                    badge.className = 'px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-gray-400';
+                    card.className = 'stage-step-card p-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-low/50 text-secondary opacity-65 transition-all duration-300 flex flex-col justify-between';
+                    badge.className = 'px-2 py-0.5 rounded text-[10px] font-medium bg-surface-container text-secondary border border-outline-variant/30';
                     badge.textContent = 'Waiting for Resume';
                 }
             }
@@ -272,7 +281,7 @@
             if (bar) bar.style.width = '100%';
             if (progressText) progressText.textContent = '100% (Completed)';
             if (statusBadge) {
-                statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30';
                 statusBadge.innerHTML = '✓ All 6 Stages Completed';
             }
         } else {
@@ -280,8 +289,8 @@
             if (bar) bar.style.width = `${pct}%`;
             if (progressText) progressText.textContent = `Stage ${stageNum} of 6 (${pct}%)`;
             if (statusBadge) {
-                statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/40 animate-pulse';
-                statusBadge.innerHTML = `<span class="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping mr-1"></span> Processing Stage ${stageNum}...`;
+                statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20 animate-pulse';
+                statusBadge.innerHTML = `<span class="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-ping mr-1"></span> Processing Stage ${stageNum}...`;
             }
         }
 
@@ -292,18 +301,18 @@
 
             if (i < stageNum || stageNum >= 7) {
                 // Completed
-                card.className = 'stage-step-card p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-950/25 text-emerald-200 transition-all duration-300 shadow-sm';
-                badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                card.className = 'stage-step-card p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.07] text-on-surface transition-all duration-300 shadow-sm flex flex-col justify-between';
+                badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30';
                 badge.innerHTML = '✓ Done';
             } else if (i === stageNum) {
                 // Active Now
-                card.className = 'stage-step-card p-3.5 rounded-xl border-2 border-blue-500 bg-blue-950/50 text-blue-100 ring-2 ring-blue-500/30 shadow-lg shadow-blue-500/20 transition-all duration-300 transform scale-[1.02]';
-                badge.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/30 text-blue-200 border border-blue-400/50 animate-pulse';
-                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping mr-1"></span> Active';
+                card.className = 'stage-step-card p-3.5 rounded-xl border-2 border-primary bg-primary/[0.08] text-on-surface ring-2 ring-primary/20 shadow-md shadow-primary/10 transition-all duration-300 transform scale-[1.01] flex flex-col justify-between';
+                badge.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/15 text-primary border border-primary/30 animate-pulse';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping mr-1"></span> Active';
             } else {
                 // Waiting
-                card.className = 'stage-step-card p-3.5 rounded-xl border border-gray-800 bg-gray-950/60 text-gray-500 opacity-60 transition-all duration-300';
-                badge.className = 'px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-gray-400';
+                card.className = 'stage-step-card p-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-low/50 text-secondary opacity-65 transition-all duration-300 flex flex-col justify-between';
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-medium bg-surface-container text-secondary border border-outline-variant/30';
                 badge.textContent = 'Waiting';
             }
         }

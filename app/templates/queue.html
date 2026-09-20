@@ -46,7 +46,7 @@
             <button 
                 id="queue-resume-btn"
                 type="button"
-                hx-post="/api/pipeline/resume/{{ run_id }}"
+                hx-post="/api/pipeline/resume/{{ run_id }}?from=queue"
                 hx-target="#queue-resume-banner"
                 hx-swap="outerHTML"
                 {% if pending_cnt > 0 %}disabled{% endif %}

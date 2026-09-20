@@ -26,17 +26,17 @@ Built for the **Darwinbox Forward Deployed Engineer (FDE)** take-home challenge.
 
 ```mermaid
 flowchart LR
-    A[Raw Source Files<br>CSV / XLSX] --> B[Ingestion & Profiling]
-    B --> C[Semantic Mapping<br>Fuzzy + Evidence + LLM]
-    C --> D[Normalization<br>Dates, Phones, Enums]
-    D --> E[Multi-Key Reconciliation<br>Cross-File Merging & Dedup]
-    E --> F[Validation Ladder<br>Validate → Auto-fix → Re-validate]
-    F --> G{Confidence & Boundary Gate}
-    G -- Confident / Rule --> H[Push Engine<br>Idempotent POST /stub/employees]
-    G -- Ambiguous / Sensitive --> Q[Human Review Queue<br>HTMX Review Cards]
-    Q -- "Resolve & Remember" --> R[(Resolution Memory<br>rules table)]
+    A["Raw Source Files<br>(CSV / XLSX)"] --> B["Ingestion & Profiling"]
+    B --> C["Semantic Mapping<br>(Fuzzy + Evidence + LLM)"]
+    C --> D["Normalization<br>(Dates, Phones, Enums)"]
+    D --> E["Multi-Key Reconciliation<br>(Cross-File Merging & Dedup)"]
+    E --> F["Validation Ladder<br>(Validate, Auto-fix, Re-validate)"]
+    F --> G{"Confidence & Boundary Gate"}
+    G -- "Confident / Rule" --> H["Push Engine<br>(Idempotent POST /stub/employees)"]
+    G -- "Ambiguous / Sensitive" --> Q["Human Review Queue<br>(HTMX Review Cards)"]
+    Q -- "Resolve & Remember" --> R[("Resolution Memory<br>(rules table)")]
     R -. "Auto-applies on Re-runs" .-> C
-    H --> S[Reconciliation Report & Audit Log]
+    H --> S["Reconciliation Report & Audit Log"]
 ```
 
 ---

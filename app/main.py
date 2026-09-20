@@ -169,7 +169,7 @@ def render_stages_html(
     elif is_paused:
         progress_pct = 80
         progress_label = f"Stage 5 (Paused for Review • {pending_count} pending)"
-        status_badge = f'<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-800 border border-amber-500/30 animate-pulse"><span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping mr-1"></span> ⏸️ PAUSED: Human Review Required ({pending_count} items)</span>'
+        status_badge = f'<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 animate-pulse"><span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping mr-1"></span> ⏸️ PAUSED: Human Review Required ({pending_count} items)</span>'
     elif is_running:
         progress_pct = int((active_step / 6) * 100)
         progress_label = f"Stage {active_step} of 6 ({progress_pct}%)"
@@ -177,53 +177,61 @@ def render_stages_html(
     else:
         progress_pct = 100
         progress_label = "100% (Completed)"
-        status_badge = '<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-800 border border-emerald-500/30">✓ All 6 Stages Completed</span>'
+        status_badge = '<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">✓ All 6 Stages Completed</span>'
 
     cards_html = []
     for s in stages_meta:
         num = s["num"]
         if not has_run:
-            card_class = "border-outline-variant/30 bg-surface-container-low/60 text-secondary opacity-70"
+            card_class = "border-outline-variant/30 bg-surface-container-low/50 text-secondary opacity-65"
             badge_class = "bg-surface-container text-secondary border border-outline-variant/30"
             badge_html = "Waiting"
-            icon_color = "text-secondary"
+            icon_color = "text-secondary/70"
+            subtitle_color = "text-secondary"
         elif is_paused:
             if num < 5:
-                card_class = "border-emerald-500/30 bg-emerald-50/50 text-emerald-950 shadow-sm"
-                badge_class = "bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 font-semibold"
+                card_class = "border-emerald-500/30 bg-emerald-500/[0.07] text-on-surface shadow-sm"
+                badge_class = "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold"
                 badge_html = "✓ Done"
-                icon_color = "text-emerald-600"
+                icon_color = "text-emerald-500"
+                subtitle_color = "text-emerald-600 dark:text-emerald-400 font-semibold"
             elif num == 5:
-                card_class = "border-2 border-amber-500 bg-amber-50/70 text-amber-950 ring-2 ring-amber-500/20 shadow-md transform scale-[1.01]"
-                badge_class = "bg-amber-500/20 text-amber-800 border border-amber-500/40 font-bold animate-pulse"
+                card_class = "border-2 border-amber-500 bg-amber-500/[0.08] text-on-surface ring-2 ring-amber-500/20 shadow-md transform scale-[1.01]"
+                badge_class = "bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 font-bold animate-pulse"
                 badge_html = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping mr-1"></span> ⏸️ Paused'
-                icon_color = "text-amber-600"
+                icon_color = "text-amber-500"
+                subtitle_color = "text-amber-600 dark:text-amber-400 font-semibold"
             else:
-                card_class = "border-outline-variant/30 bg-surface-container-low/60 text-secondary opacity-70"
+                card_class = "border-outline-variant/30 bg-surface-container-low/50 text-secondary opacity-65"
                 badge_class = "bg-surface-container text-secondary border border-outline-variant/30"
                 badge_html = "Waiting for Resume"
-                icon_color = "text-secondary"
+                icon_color = "text-secondary/70"
+                subtitle_color = "text-secondary"
         elif is_running:
             if num < active_step:
-                card_class = "border-emerald-500/30 bg-emerald-50/50 text-emerald-950 shadow-sm"
-                badge_class = "bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 font-semibold"
+                card_class = "border-emerald-500/30 bg-emerald-500/[0.07] text-on-surface shadow-sm"
+                badge_class = "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold"
                 badge_html = "✓ Done"
-                icon_color = "text-emerald-600"
+                icon_color = "text-emerald-500"
+                subtitle_color = "text-emerald-600 dark:text-emerald-400 font-semibold"
             elif num == active_step:
-                card_class = "border-2 border-primary bg-surface-container-lowest text-on-surface ring-2 ring-primary/20 shadow-md shadow-primary/5 transform scale-[1.01]"
-                badge_class = "bg-primary/10 text-primary border border-primary/30 font-bold animate-pulse"
+                card_class = "border-2 border-primary bg-primary/[0.08] text-on-surface ring-2 ring-primary/20 shadow-md shadow-primary/10 transform scale-[1.01]"
+                badge_class = "bg-primary/15 text-primary border border-primary/30 font-bold animate-pulse"
                 badge_html = '<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping mr-1"></span> Active'
                 icon_color = "text-primary"
+                subtitle_color = "text-primary font-semibold"
             else:
-                card_class = "border-outline-variant/30 bg-surface-container-low/60 text-secondary opacity-70"
+                card_class = "border-outline-variant/30 bg-surface-container-low/50 text-secondary opacity-65"
                 badge_class = "bg-surface-container text-secondary border border-outline-variant/30"
                 badge_html = "Waiting"
-                icon_color = "text-secondary"
+                icon_color = "text-secondary/70"
+                subtitle_color = "text-secondary"
         else:
-            card_class = "border-emerald-500/30 bg-emerald-50/50 text-emerald-950 shadow-sm"
-            badge_class = "bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 font-semibold"
+            card_class = "border-emerald-500/30 bg-emerald-500/[0.07] text-on-surface shadow-sm"
+            badge_class = "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold"
             badge_html = "✓ Done"
-            icon_color = "text-emerald-600"
+            icon_color = "text-emerald-500"
+            subtitle_color = "text-emerald-600 dark:text-emerald-400 font-semibold"
 
         cards_html.append(f"""
         <div id="stage-card-{num}" class="stage-step-card p-3.5 rounded-xl border {card_class} transition-all duration-300 flex flex-col justify-between">
@@ -240,7 +248,7 @@ def render_stages_html(
                     </span>
                 </div>
                 <div class="font-bold text-xs text-on-surface mb-0.5">{s['title']}</div>
-                <div class="text-[10px] text-primary font-medium mb-1">{s['subtitle']}</div>
+                <div class="text-[10px] {subtitle_color} mb-1">{s['subtitle']}</div>
                 <div class="text-[11px] text-secondary leading-snug">{s['desc']}</div>
             </div>
         </div>
@@ -464,6 +472,9 @@ async def index_view(request: Request):
         pending_count=len(pending_escs),
     )
     inline_escalations_html = render_inline_escalations_html(run_id or "", pending_escs) if is_paused else ""
+    banner_msg = None
+    if request.query_params.get("resumed"):
+        banner_msg = f"Pipeline resumed! Successfully completed push to Darwinbox API ({stats['pushed_records']} records pushed)."
 
     return templates.TemplateResponse(
         request=request,
@@ -474,6 +485,7 @@ async def index_view(request: Request):
             "events": events,
             "stages_html": stages_html,
             "inline_escalations_html": inline_escalations_html,
+            "banner_msg": banner_msg,
         },
     )
 
@@ -663,8 +675,8 @@ async def upload_and_run(files: List[UploadFile] = File(...)):
     ))
 
 
-@app.post("/api/pipeline/resume/{run_id}", response_class=HTMLResponse)
-async def resume_pipeline_endpoint(run_id: str):
+@app.post("/api/pipeline/resume/{run_id}")
+async def resume_pipeline_endpoint(run_id: str, request: Request):
     """Resume a paused pipeline run after human review and push records to target API."""
     conn = get_db_connection()
     pending_row = conn.execute(
@@ -672,7 +684,19 @@ async def resume_pipeline_endpoint(run_id: str):
     ).fetchone()
     pending_cnt = pending_row["cnt"] if pending_row else 0
 
+    hx_current = request.headers.get("hx-current-url", "")
+    is_from_queue = ("queue" in hx_current) or (request.query_params.get("from") == "queue")
+
     if pending_cnt > 0:
+        if is_from_queue:
+            return HTMLResponse(f"""
+            <div id="queue-resume-banner" class="bg-amber-500/10 border-2 border-amber-500/40 rounded-2xl p-4 text-xs text-amber-900 flex items-center justify-between">
+                <span class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-amber-600 text-base">warning</span>
+                    <span>Cannot resume: {pending_cnt} decision(s) are still pending human review. Please resolve all cards below first.</span>
+                </span>
+            </div>
+            """)
         stats = get_dashboard_stats(conn, run_id)
         events = tail_events(conn, run_id, last_id=0, limit=50)
         pending_escs = get_pending_escalations(conn, run_id)
@@ -688,6 +712,10 @@ async def resume_pipeline_endpoint(run_id: str):
     result = await asyncio.to_thread(resume_pipeline, run_id=run_id)
     stats = get_dashboard_stats(conn, run_id)
     events = tail_events(conn, run_id, last_id=0, limit=50)
+
+    if is_from_queue:
+        return Response(status_code=200, headers={"HX-Redirect": f"/?resumed=1&run_id={run_id}"})
+
     return HTMLResponse(render_run_container_html(
         run_id,
         stats,
@@ -832,7 +860,11 @@ async def resolve_escalation_endpoint(
                 btn.classList.remove('opacity-60', 'cursor-not-allowed', 'bg-surface-container-high', 'text-secondary');
                 btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'text-white', 'shadow-md', 'cursor-pointer');
                 btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">play_arrow</span><span>▶ All Decisions Resolved — Click to Resume &amp; Push</span>';
-                btn.setAttribute('hx-post', '/api/pipeline/resume/{r_id}');
+                if (btn.id === 'queue-resume-btn' || window.location.pathname.includes('queue')) {{
+                    btn.setAttribute('hx-post', '/api/pipeline/resume/' + '{r_id}' + '?from=queue');
+                }} else {{
+                    btn.setAttribute('hx-post', '/api/pipeline/resume/' + '{r_id}');
+                }}
                 if (window.htmx) htmx.process(btn);
             }});
         </script>
