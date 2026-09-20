@@ -1,10 +1,8 @@
 # Darwinbox FDE Take-Home Defense: Autonomous Client Data Migration Agent
 
-**Author:** Anshik Thakur  
-**Contact:** +91-7973990693 | thakuranshik5555@gmail.com  
-**Project:** DarwinSync AI — Autonomous Client Data Migration & Integration Agent  
-**Live Hosted Prototype:** [https://fde-production-dbcc.up.railway.app/](https://fde-production-dbcc.up.railway.app/)  
-**Repository:** [github.com/Anshik55/FDE](https://github.com/Anshik55/FDE)  
+**Author:** Forward Deployed Engineer Candidate  
+**Project:** DataBridge AI — Autonomous Client Data Migration & Integration Agent  
+**Repository:** [Anshik55/FDE](https://github.com/Anshik55/FDE)  
 
 ---
 
