@@ -295,4 +295,46 @@ def test_push_rejection_pauses_pipeline_and_repush_on_resolve(client):
     assert run_final["status"] == "completed"
 
 
+def test_completed_run_toast_and_results_hub(client):
+    """Verify base template includes toast container and completed runs render results hub with download/view links."""
+    # 1. Base template has toast container and showToast
+    index_resp = client.get("/")
+    assert index_resp.status_code == 200
+    assert 'id="toast-container"' in index_resp.text
+    assert "window.showToast" in index_resp.text
+    assert "triggerCompletionToast" in index_resp.text
+
+    # 2. Reset database and run clean sample fixtures (no escalations if rules remembered, or resolve pause)
+    client.post("/api/db/reset")
+    run_resp = client.post("/api/run")
+    assert run_resp.status_code == 200
+    html = run_resp.text
+
+    import re
+    run_id_match = re.search(r"run_[a-f0-9]+", html)
+    assert run_id_match is not None
+    run_id = run_id_match.group(0)
+
+    # If paused, resolve all escalations and resume to test completion
+    if "PAUSED" in html or "paused" in html:
+        esc_ids = re.findall(r"/api/escalations/([a-f0-9\-]+)/resolve", html)
+        for esc_id in set(esc_ids):
+            client.post(f"/api/escalations/{esc_id}/resolve", data={"action": "approve", "remember": False})
+        resume_resp = client.post(f"/api/pipeline/resume/{run_id}")
+        assert resume_resp.status_code == 200
+        completed_html = resume_resp.text
+    else:
+        completed_html = html
+
+    # Verify completion attributes and results hub
+    assert 'data-status="completed"' in completed_html
+    assert "Migration Completed & Synced" in completed_html
+    assert "View Processed Data" in completed_html
+    assert "Download CSV" in completed_html
+    assert "Reconciliation Report" in completed_html
+    assert f"/records?run_id={run_id}" in completed_html
+    assert f"/api/export/records.csv?run_id={run_id}" in completed_html
+
+
+
 

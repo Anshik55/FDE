@@ -278,5 +278,157 @@
 
         document.addEventListener('DOMContentLoaded', updateThemeUI);
     </script>
+
+    <!-- Global Toast Notifications Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none max-w-md w-full px-4 sm:px-0"></div>
+
+    <script>
+        window.showToast = function({
+            title = "Notification",
+            message = "",
+            type = "success",
+            duration = 10000,
+            actions = [],
+            countdown = null,
+        } = {}) {
+            const container = document.getElementById('toast-container');
+            if (!container) return null;
+
+            const toast = document.createElement('div');
+            toast.className = 'pointer-events-auto bg-surface-container-lowest/95 backdrop-blur-md border border-emerald-500/40 text-on-surface shadow-2xl rounded-2xl p-4 sm:p-5 transition-all duration-300 transform translate-y-4 opacity-0 flex flex-col gap-3 ring-1 ring-black/5 dark:ring-white/10';
+
+            let iconColor = 'text-emerald-500';
+            let iconName = 'check_circle';
+            if (type === 'error') {
+                iconColor = 'text-red-500';
+                iconName = 'error';
+                toast.className = toast.className.replace('border-emerald-500/40', 'border-red-500/40');
+            } else if (type === 'warning') {
+                iconColor = 'text-amber-500';
+                iconName = 'warning';
+                toast.className = toast.className.replace('border-emerald-500/40', 'border-amber-500/40');
+            } else if (type === 'info') {
+                iconColor = 'text-primary';
+                iconName = 'info';
+                toast.className = toast.className.replace('border-emerald-500/40', 'border-primary/40');
+            }
+
+            let countdownTimer = null;
+            let autoDismissTimer = null;
+            let remainingSec = countdown ? countdown.seconds : 0;
+
+            function dismiss() {
+                if (countdownTimer) clearInterval(countdownTimer);
+                if (autoDismissTimer) clearTimeout(autoDismissTimer);
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-4', 'opacity-0');
+                setTimeout(() => {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 300);
+            }
+
+            function stopCountdown() {
+                if (countdownTimer) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                }
+                const wrapper = toast.querySelector('#toast-countdown-wrapper');
+                if (wrapper) {
+                    wrapper.innerHTML = '<span class="text-[11px] text-secondary font-mono italic">Redirect paused. You can navigate or export using the links above.</span>';
+                }
+            }
+
+            let actionsHtml = '';
+            if (actions && actions.length > 0) {
+                actionsHtml = '<div class="flex flex-wrap items-center gap-2 pt-0.5">' + actions.map((act, idx) => {
+                    const btnClass = act.primary 
+                        ? 'px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer flex items-center gap-1.5'
+                        : 'px-3 py-1.5 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-lg border border-outline-variant/40 transition cursor-pointer flex items-center gap-1.5';
+                    const downloadAttr = act.download ? 'download' : '';
+                    const clickAttr = act.download ? 'onclick="if(window.__activeToastCancel) window.__activeToastCancel();"' : '';
+                    return `<a href="${act.href}" ${downloadAttr} ${clickAttr} class="${btnClass}" id="toast-action-${idx}">
+                        ${act.icon ? `<span class="material-symbols-outlined text-[15px]">${act.icon}</span>` : ''}
+                        <span>${act.text}</span>
+                    </a>`;
+                }).join('') + '</div>';
+            }
+
+            let countdownHtml = '';
+            if (countdown) {
+                countdownHtml = `
+                <div id="toast-countdown-wrapper" class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs">
+                    <div class="flex items-center gap-1.5 text-secondary">
+                        <span class="material-symbols-outlined text-emerald-600 text-[16px] animate-spin">sync</span>
+                        <span>${countdown.label || 'Redirecting in'} <strong id="toast-countdown-num" class="font-mono text-on-surface font-bold text-emerald-600 dark:text-emerald-400">${remainingSec}s</strong></span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" id="toast-go-now" class="px-2.5 py-1 bg-primary text-white text-[11px] font-bold rounded-lg hover:bg-primary/90 transition shadow-sm">
+                            Go Now
+                        </button>
+                        <button type="button" id="toast-cancel-countdown" class="px-2 py-1 bg-surface-container hover:bg-surface-container-high text-secondary hover:text-on-surface text-[11px] font-semibold rounded-lg border border-outline-variant/40 transition">
+                            Stay Here
+                        </button>
+                    </div>
+                </div>
+                `;
+            }
+
+            toast.innerHTML = `
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined ${iconColor} text-2xl shrink-0 mt-0.5">${iconName}</span>
+                        <div>
+                            <h4 class="text-sm font-bold font-headline text-on-surface tracking-tight">${title}</h4>
+                            <p class="text-xs text-secondary mt-0.5 leading-relaxed">${message}</p>
+                        </div>
+                    </div>
+                    <button type="button" id="toast-dismiss-btn" class="text-secondary hover:text-on-surface p-1 rounded-lg hover:bg-surface-container transition shrink-0" aria-label="Dismiss">
+                        <span class="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                </div>
+                ${actionsHtml}
+                ${countdownHtml}
+            `;
+
+            container.appendChild(toast);
+
+            window.__activeToastCancel = stopCountdown;
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+            });
+
+            const dismissBtn = toast.querySelector('#toast-dismiss-btn');
+            if (dismissBtn) dismissBtn.onclick = dismiss;
+
+            const cancelBtn = toast.querySelector('#toast-cancel-countdown');
+            if (cancelBtn) cancelBtn.onclick = stopCountdown;
+
+            const goBtn = toast.querySelector('#toast-go-now');
+            if (goBtn && countdown) {
+                goBtn.onclick = () => {
+                    stopCountdown();
+                    window.location.href = countdown.targetHref;
+                };
+            }
+
+            if (countdown && countdown.seconds > 0 && countdown.targetHref) {
+                countdownTimer = setInterval(() => {
+                    remainingSec--;
+                    const numEl = toast.querySelector('#toast-countdown-num');
+                    if (numEl) numEl.textContent = `${remainingSec}s`;
+                    if (remainingSec <= 0) {
+                        clearInterval(countdownTimer);
+                        window.location.href = countdown.targetHref;
+                    }
+                }, 1000);
+            } else if (duration) {
+                autoDismissTimer = setTimeout(dismiss, duration);
+            }
+
+            return { dismiss, stopCountdown };
+        };
+    </script>
 </body>
 </html>

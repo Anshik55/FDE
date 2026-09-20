@@ -557,6 +557,13 @@ async def index_view(request: Request):
     pending_escs = get_pending_escalations(conn, run_id) if run_id else []
     is_paused = (run_status == "paused")
     is_push_paused = any("PUSH" in e.get("type", "") for e in pending_escs)
+    is_completed = bool(
+        not is_paused
+        and run_id
+        and run_id != "No Active Run"
+        and stats.get("pushed_records", 0) > 0
+        and len(pending_escs) == 0
+    )
 
     stages_html = render_stages_html(
         run_id or "No Active Run",
@@ -582,8 +589,11 @@ async def index_view(request: Request):
             "stages_html": stages_html,
             "inline_escalations_html": inline_escalations_html,
             "banner_msg": banner_msg,
+            "is_completed": is_completed,
+            "is_paused": is_paused,
         },
     )
+
 
 
 def render_run_container_html(
@@ -641,13 +651,63 @@ def render_run_container_html(
     )
     escalations_panel = render_inline_escalations_html(run_id, pending_escalations or []) if is_paused else ""
 
+    is_completed = (
+        not is_paused
+        and not is_running
+        and bool(run_id)
+        and run_id != "No Active Run"
+        and stats.get("pushed_records", 0) > 0
+        and len(pending_escalations or []) == 0
+    )
+
+    completed_banner_html = ""
+    if is_completed:
+        completed_banner_html = f"""
+        <div class="bg-gradient-to-r from-emerald-500/10 via-primary/5 to-emerald-500/10 border-2 border-emerald-500/40 rounded-2xl p-5 shadow-sm space-y-3">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="h-11 w-11 rounded-xl bg-emerald-500/20 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                        <span class="material-symbols-outlined text-2xl">task_alt</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-bold font-headline text-on-surface tracking-tight">Migration Completed & Synced</h3>
+                            <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30">✓ Darwinbox Verified</span>
+                        </div>
+                        <p class="text-xs text-secondary mt-0.5 leading-relaxed">
+                            All {stats['pushed_records']} canonical records successfully normalized, reconciled, and dispatched. Target records and audit exports are ready.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="/records?run_id={run_id}" class="px-3.5 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px]">table_chart</span>
+                        <span>View Processed Data</span>
+                    </a>
+                    <a href="/api/export/records.csv?run_id={run_id}" download class="px-3 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-xl border border-outline-variant/40 flex items-center gap-1.5 transition cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px] text-secondary">download</span>
+                        <span>Download CSV</span>
+                    </a>
+                    <a href="/report?run_id={run_id}" class="px-3 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-xl border border-outline-variant/40 flex items-center gap-1.5 transition cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px] text-primary">description</span>
+                        <span>Reconciliation Report</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        """
+
+    status_attr = "completed" if is_completed else ("paused" if is_paused else ("running" if is_running else "idle"))
+
     return f"""
-    <div id="run-container" class="space-y-6">
+    <div id="run-container" class="space-y-6" data-run-id="{run_id}" data-status="{status_attr}" data-pushed="{stats.get('pushed_records', 0)}">
         {banner_html}
+        {completed_banner_html}
         <!-- Bento Metric Ribbon -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
                 <div class="flex justify-between items-start mb-2">
+
                     <span class="text-xs font-semibold uppercase tracking-wider text-secondary">Source Records In</span>
                     <span class="material-symbols-outlined text-primary text-xl">dataset</span>
                 </div>

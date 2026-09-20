@@ -104,8 +104,41 @@
         }
     </script>
 
-    <div id="run-container" class="space-y-6">
-        {% if banner_msg %}
+    <div id="run-container" class="space-y-6" data-run-id="{{ run_id }}" data-status="{% if is_completed %}completed{% elif is_paused %}paused{% else %}idle{% endif %}" data-pushed="{{ stats.pushed_records }}">
+        {% if is_completed %}
+        <div class="bg-gradient-to-r from-emerald-500/10 via-primary/5 to-emerald-500/10 border-2 border-emerald-500/40 rounded-2xl p-5 shadow-sm space-y-3">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="h-11 w-11 rounded-xl bg-emerald-500/20 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                        <span class="material-symbols-outlined text-2xl">task_alt</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-bold font-headline text-on-surface tracking-tight">Migration Completed & Synced</h3>
+                            <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30">✓ Darwinbox Verified</span>
+                        </div>
+                        <p class="text-xs text-secondary mt-0.5 leading-relaxed">
+                            All {{ stats.pushed_records }} canonical records successfully normalized, reconciled, and dispatched. Target records and audit exports are ready.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="/records?run_id={{ run_id }}" class="px-3.5 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px]">table_chart</span>
+                        <span>View Processed Data</span>
+                    </a>
+                    <a href="/api/export/records.csv?run_id={{ run_id }}" download class="px-3 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-xl border border-outline-variant/40 flex items-center gap-1.5 transition cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px] text-secondary">download</span>
+                        <span>Download CSV</span>
+                    </a>
+                    <a href="/report?run_id={{ run_id }}" class="px-3 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-xl border border-outline-variant/40 flex items-center gap-1.5 transition cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px] text-primary">description</span>
+                        <span>Reconciliation Report</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% elif banner_msg %}
         <div class="p-3.5 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs flex items-center justify-between shadow-sm">
             <span class="flex items-center gap-2">
                 <span class="h-2 w-2 rounded-full bg-primary"></span>
@@ -316,6 +349,50 @@
         }
     }
 
+    function triggerCompletionToast(runId, pushedCount) {
+        if (!runId || runId === 'No Active Run') return;
+        window.__completedRunsToast = window.__completedRunsToast || new Set();
+        if (window.__completedRunsToast.has(runId)) return;
+        window.__completedRunsToast.add(runId);
+
+        if (typeof updatePipelineStage === 'function') {
+            updatePipelineStage('complete', true, false);
+        }
+
+        if (typeof window.showToast === 'function') {
+            const countMsg = (pushedCount && pushedCount !== '0') ? `${pushedCount} canonical records` : 'All records';
+            window.showToast({
+                title: "Migration Completed & Synced",
+                message: `${countMsg} successfully verified and synchronized with Darwinbox mock target API.`,
+                type: "success",
+                actions: [
+                    { text: "View Results", href: `/records?run_id=${encodeURIComponent(runId)}`, icon: "table_chart", primary: true },
+                    { text: "Download CSV", href: `/api/export/records.csv?run_id=${encodeURIComponent(runId)}`, icon: "download", download: true },
+                    { text: "Audit Report", href: `/report?run_id=${encodeURIComponent(runId)}`, icon: "description" },
+                ],
+                countdown: {
+                    seconds: 6,
+                    targetHref: `/records?run_id=${encodeURIComponent(runId)}`,
+                    label: "Showing processed results in",
+                }
+            });
+        }
+    }
+
+    function checkRunCompletion() {
+        const container = document.getElementById('run-container');
+        if (!container) return;
+        const status = container.getAttribute('data-status');
+        const runId = container.getAttribute('data-run-id');
+        const pushed = container.getAttribute('data-pushed');
+        if (status === 'completed' && runId && runId !== 'No Active Run') {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('resumed') || window.__htmxRunTriggered) {
+                triggerCompletionToast(runId, pushed);
+            }
+        }
+    }
+
     function initStageObserver() {
         const feed = document.getElementById('events-feed');
         if (!feed) return;
@@ -328,8 +405,14 @@
                         const evType = node.getAttribute('data-type');
                         if (evType === 'PIPELINE_PAUSED') {
                             updatePipelineStage('validate', false, true);
+                        } else if (evType === 'RUN_COMPLETED') {
+                            updatePipelineStage('complete', true, false);
+                            const container = document.getElementById('run-container');
+                            const runId = (container && container.getAttribute('data-run-id')) || '{{ run_id }}';
+                            const pushed = (container && container.getAttribute('data-pushed')) || '';
+                            triggerCompletionToast(runId, pushed);
                         } else if (st) {
-                            updatePipelineStage(st, evType === 'RUN_COMPLETED', false);
+                            updatePipelineStage(st, false, false);
                         }
                     }
                 }
@@ -338,9 +421,22 @@
         observer.observe(feed, { childList: true });
     }
 
-    document.addEventListener('DOMContentLoaded', initStageObserver);
+    document.addEventListener('DOMContentLoaded', function() {
+        initStageObserver();
+        checkRunCompletion();
+    });
+
     document.addEventListener('htmx:afterSwap', function(evt) {
         initStageObserver();
+        const container = document.getElementById('run-container');
+        if (container) {
+            const status = container.getAttribute('data-status');
+            const runId = container.getAttribute('data-run-id');
+            const pushed = container.getAttribute('data-pushed');
+            if (status === 'completed' && runId && runId !== 'No Active Run') {
+                triggerCompletionToast(runId, pushed);
+            }
+        }
     });
 </script>
 {% endblock %}
