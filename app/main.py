@@ -410,6 +410,9 @@ def render_inline_escalations_html(run_id: str, escalations: list) -> str:
             id="resume-pipeline-btn"
             type="button"
             disabled
+            hx-post="/api/pipeline/resume/{run_id}"
+            hx-target="#run-container"
+            hx-swap="outerHTML"
             title="Please resolve all pending decisions before resuming migration"
             class="queue-resume-btn px-4 py-2 bg-surface-container-high border border-outline-variant/40 text-secondary font-bold text-xs rounded-xl flex items-center gap-2 transition opacity-60 cursor-not-allowed whitespace-nowrap">
             <span class="material-symbols-outlined text-[16px] text-amber-600">warning</span>
@@ -420,6 +423,7 @@ def render_inline_escalations_html(run_id: str, escalations: list) -> str:
         resume_btn_html = f"""
         <button 
             id="resume-pipeline-btn"
+            type="button"
             hx-post="/api/pipeline/resume/{run_id}"
             hx-target="#run-container"
             hx-swap="outerHTML"
@@ -865,13 +869,18 @@ async def resolve_escalation_endpoint(
         <script>
             document.querySelectorAll('#resume-pipeline-btn, #queue-resume-btn, .queue-resume-btn').forEach(btn => {{
                 btn.disabled = false;
+                btn.removeAttribute('title');
                 btn.classList.remove('opacity-60', 'cursor-not-allowed', 'bg-surface-container-high', 'text-secondary');
                 btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'text-white', 'shadow-md', 'cursor-pointer');
                 btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">play_arrow</span><span>▶ All Decisions Resolved — Click to Resume &amp; Push</span>';
                 if (btn.id === 'queue-resume-btn' || window.location.pathname.includes('queue')) {{
                     btn.setAttribute('hx-post', '/api/pipeline/resume/' + '{r_id}' + '?from=queue');
+                    btn.setAttribute('hx-target', '#queue-resume-banner');
+                    btn.setAttribute('hx-swap', 'outerHTML');
                 }} else {{
                     btn.setAttribute('hx-post', '/api/pipeline/resume/' + '{r_id}');
+                    btn.setAttribute('hx-target', '#run-container');
+                    btn.setAttribute('hx-swap', 'outerHTML');
                 }}
                 if (window.htmx) htmx.process(btn);
             }});
