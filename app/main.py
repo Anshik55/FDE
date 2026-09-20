@@ -43,7 +43,7 @@ def get_dashboard_stats(conn: sqlite3.Connection, run_id: Optional[str]):
     if not run_id:
         return {
             "total_source_rows": 0,
-            "autonomy_score": 100,
+            "autonomy_score": "—",
             "pending_escalations": 0,
             "pushed_records": 0,
         }
@@ -51,6 +51,14 @@ def get_dashboard_stats(conn: sqlite3.Connection, run_id: Optional[str]):
     total_rows = conn.execute(
         "SELECT COUNT(*) as cnt FROM source_rows WHERE run_id = ?", (run_id,)
     ).fetchone()["cnt"]
+
+    if total_rows == 0:
+        return {
+            "total_source_rows": 0,
+            "autonomy_score": "—",
+            "pending_escalations": 0,
+            "pushed_records": 0,
+        }
 
     pending_esc = conn.execute(
         "SELECT COUNT(*) as cnt FROM escalations WHERE run_id = ? AND status = 'pending'", (run_id,)
@@ -71,7 +79,7 @@ def get_dashboard_stats(conn: sqlite3.Connection, run_id: Optional[str]):
     ).fetchone()["cnt"]
 
     total_decisions = human_events + agent_events
-    autonomy = round((agent_events / total_decisions) * 100, 1) if total_decisions > 0 else 100.0
+    autonomy = round((agent_events / total_decisions) * 100, 1) if total_decisions > 0 else "—"
 
     return {
         "total_source_rows": total_rows,
@@ -566,7 +574,7 @@ def render_run_container_html(
                     <span class="material-symbols-outlined text-emerald-600 text-xl">verified</span>
                 </div>
                 <div>
-                    <div class="text-3xl font-bold font-headline text-emerald-600 tracking-tight">{stats['autonomy_score']}%</div>
+                    <div class="text-3xl font-bold font-headline text-emerald-600 tracking-tight">{'—' if str(stats['autonomy_score']) == '—' else f"{stats['autonomy_score']}%"}</div>
                     <div class="text-xs text-secondary/80 mt-1 flex items-center gap-1">
                         <span>Automated resolutions</span>
                     </div>
@@ -592,7 +600,7 @@ def render_run_container_html(
                 <div>
                     <div class="text-3xl font-bold font-headline text-primary tracking-tight">{stats['pushed_records']}</div>
                     <div class="text-xs text-secondary/80 mt-1 flex items-center gap-1">
-                        <span>Darwinbox v2.4 verified</span>
+                        <span>Mock Target (Darwinbox-shaped) verified</span>
                     </div>
                 </div>
             </div>
@@ -731,7 +739,7 @@ async def reset_db_endpoint():
     reset_database()
     empty_stats = {
         "total_source_rows": 0,
-        "autonomy_score": 100.0,
+        "autonomy_score": "—",
         "pending_escalations": 0,
         "pushed_records": 0,
     }

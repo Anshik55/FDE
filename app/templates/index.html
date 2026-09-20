@@ -121,7 +121,7 @@
                     <span class="material-symbols-outlined text-emerald-600 text-xl">verified</span>
                 </div>
                 <div>
-                    <div class="text-3xl font-bold font-headline text-emerald-600 tracking-tight" id="stat-autonomy">{{ stats.autonomy_score }}%</div>
+                    <div class="text-3xl font-bold font-headline text-emerald-600 tracking-tight" id="stat-autonomy">{% if stats.autonomy_score == '—' %}—{% else %}{{ stats.autonomy_score }}%{% endif %}</div>
                     <div class="text-xs text-secondary/80 mt-1 flex items-center gap-1">
                         <span>Resolved without human intervention</span>
                     </div>
@@ -147,7 +147,7 @@
                 <div>
                     <div class="text-3xl font-bold font-headline text-primary tracking-tight" id="stat-pushed">{{ stats.pushed_records }}</div>
                     <div class="text-xs text-secondary/80 mt-1 flex items-center gap-1">
-                        <span>Darwinbox v2.4 verified</span>
+                        <span>Mock Target (Darwinbox-shaped) verified</span>
                     </div>
                 </div>
             </div>

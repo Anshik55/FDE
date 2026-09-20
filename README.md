@@ -1,10 +1,11 @@
-# DataBridge AI: Autonomous Client Data Migration & Integration
+# DarwinSync AI: Autonomous Client Data Migration & Integration
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Append--Only-003B57.svg)](https://sqlite.org)
 [![HTMX](https://img.shields.io/badge/HTMX-SSE%20Live-336699.svg)](https://htmx.org)
-[![Test Suite](https://img.shields.io/badge/tests-18%20passed%20(100%25)-success.svg)](https://pytest.org)
+[![CI](https://github.com/Anshik55/FDE/actions/workflows/ci.yml/badge.svg)](https://github.com/Anshik55/FDE/actions)
+[![Demo](https://img.shields.io/badge/Hosted%20Demo-Railway-success.svg)](https://fde-production-dbcc.up.railway.app/)
 
 An autonomous, event-sourced AI agent designed to ingest messy, multi-file client HR/CRM exports, perform semantic schema mapping and cross-source reconciliation, enforce strict validation ladders, and push to target APIs (such as Darwinbox) with idempotency, backoff retry, and compensating rollback.
 
@@ -15,9 +16,9 @@ Built for the **Darwinbox Forward Deployed Engineer (FDE)** take-home challenge.
 ## Key Differentiators & Highlights
 
 1. **Defensible Autonomy Policy:** Grounded in a formal escalation boundary matrix ([DECISIONS.md](DECISIONS.md) & [WRITEUP.md](WRITEUP.md)). Automates verifiable, reversible, low-blast-radius operations; escalates high-blast-radius ambiguities (near-duplicates, sensitive data conflicts, ambiguous dates).
-2. **Delta Solutioning & Resolution Memory:** Human decisions (mapping, enum resolution, date formats) are fingerprinted and persisted as client-scoped rules. On subsequent runs, escalations shrink by **>50%**.
-3. **Append-Only Event Spine:** Every action carries `(before, after, reason, score, actor)`. Backed by SQLite database triggers prohibiting `UPDATE` and `DELETE` on the `events` table.
-4. **Mock Target API with Fault Injection:** Includes `/stub/employees` with `Idempotency-Key` deduplication, 503 retry with exponential backoff, 422 unprocessable rejection, and batch outage compensating rollback.
+2. **Delta Solutioning & Resolution Memory:** Human decisions (mapping, enum resolution, date formats) are fingerprinted and persisted as client-scoped rules. On subsequent runs, escalations shrink by **-57%** (7 &rarr; 3 review cards on planted fixtures).
+3. **Append-Only Event Spine:** Every action carries `(before, after, reason, score, actor)`. Backed by SQLite database triggers prohibiting `UPDATE` and `DELETE` on the `events` table with deterministic SHA256 audit replay.
+4. **Mock Target API (Darwinbox-shaped) with Fault Injection:** Includes `/stub/employees` with `Idempotency-Key` deduplication, 503 retry with exponential backoff, 422 unprocessable rejection, and batch outage compensating rollback.
 5. **No-Build Reactive Web UI:** Built with FastAPI + Jinja2 + HTMX + Server-Sent Events (SSE) + Tailwind CSS CDN. Zero npm/node build steps required.
 
 ---
@@ -148,7 +149,7 @@ In replay mode:
 | 2 | Ambiguous DOJ dates ($\le$ 12) | `payroll_export.xlsx` | **Escalates** once per column (DD/MM vs MM/DD) |
 | 3 | Exact duplicate employees | HRIS & Payroll | **Auto-merges** with corroborating details |
 | 4 | Near-duplicate: "Rahul Sharma" vs "Rahul Sherma" (same DOB) | HRIS & CRM | **Escalates** (Irreversible identity risk) |
-| 5 | Salary conflict for E1005 (80k vs 88k) | HRIS & Payroll | **Escalates** (Sensitive field conflict) |
+| 5 | Salary conflict for E1005 (₹80,000 vs ₹88,000) | HRIS & Payroll | **Escalates** (Sensitive field conflict) |
 | 6 | Unknown status `"LOA"` | `hris_export.csv` | **Escalates as 1 group** with proposal $\rightarrow$ `"On Leave"` |
 | 7 | Missing required email for E1030 | `hris_export.csv` | **Escalates** (Fails validation twice) |
 | 8 | Missing email in HRIS present in CRM | HRIS & CRM | **Auto-fills** during reconciliation |

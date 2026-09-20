@@ -154,7 +154,7 @@
                     <span class="material-symbols-outlined text-primary text-[15px]">corporate_fare</span>
                     <span class="text-xs text-on-surface-variant">
                         Client: <strong class="text-on-surface font-semibold">Acme Corp</strong>
-                        <span class="text-secondary font-mono text-[11px]">(Multi-Source CSV &rarr; Darwinbox v2.4)</span>
+                        <span class="text-secondary font-mono text-[11px]">(Multi-Source CSV &rarr; Mock Target API)</span>
                     </span>
                 </div>
             </div>
@@ -199,11 +199,25 @@
             </nav>
 
             <!-- Right Actions & Target Meta -->
-            <div class="flex items-center gap-2.5 shrink-0">
+            <div class="flex items-center gap-2 shrink-0">
                 <div class="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-container-low rounded-xl border border-surface-container-high text-xs">
                     <span class="material-symbols-outlined text-secondary text-[15px]">dns</span>
-                    <span class="font-mono text-[11px] text-on-surface-variant">Darwinbox Staging v2.4</span>
+                    <span class="font-mono text-[11px] text-on-surface-variant">Mock Target API (Darwinbox-shaped)</span>
                 </div>
+
+                <!-- Reset Demo Button -->
+                <button 
+                    hx-post="/api/db/reset"
+                    hx-target="#run-container"
+                    hx-swap="outerHTML"
+                    hx-confirm="Reset demo to a clean cold-start state (clears past runs and learned rules)?"
+                    onclick="if (window.location.pathname !== '/') { setTimeout(() => window.location.href = '/', 250); }"
+                    type="button"
+                    title="Reset demo to fresh cold-start state"
+                    class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-surface-container hover:bg-surface-container-high text-secondary hover:text-on-surface border border-outline-variant/30 flex items-center gap-1.5 transition cursor-pointer shadow-sm">
+                    <span class="material-symbols-outlined text-[15px] text-amber-500">restart_alt</span>
+                    <span class="hidden sm:inline text-[11px]">Reset Demo</span>
+                </button>
 
                 <!-- Dark / Light Theme Toggle Button -->
                 <button 
