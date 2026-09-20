@@ -16,27 +16,27 @@ In enterprise HR implementations (like Darwinbox), a flawed migration corrupts p
 This agent draws a mathematically defensible boundary:
 
 ```
-                  ┌─────────────────────────────────────────────────────────────┐
-                  │                 HIGH BLAST-RADIUS / AMBIGUOUS               │
-                  │   • Near-duplicates (high name match, same DOB, diff ID)    │
-                  │   • Date formats with all days ≤ 12 (DD/MM vs MM/DD)        │
-                  │   • Column plausibly maps to 2 fields (top-2 margin < 0.20) │
-                  │   • Value agent cannot clean (unknown enum e.g. "LOA")      │
-                  │   • Record fails validation twice (unresolvable missing PII)│
-                  │   • Sensitive field conflicts across sources (Salary)       │
-                  │   • Push 422 Client Error / Target infrastructure outage    │
-                  │                                                             │
-                  │              ─── ESCALATE TO HUMAN REVIEW ───               │
-                  ├─────────────────────────────────────────────────────────────┤
-                  │              ─── AGENT ACTS AUTONOMOUSLY ───                │
-                  │                                                             │
+                  ┌───────────────────────────────────────────────────────────────┐
+                  │                 HIGH BLAST-RADIUS / AMBIGUOUS                 │
+                  │   • Near-duplicates (high name match, same DOB, diff ID)      │ 
+                  │   • Date formats with all days ≤ 12 (DD/MM vs MM/DD)          │
+                  │   • Column plausibly maps to 2 fields (top-2 margin < 0.20 )  │
+                  │   • Value agent cannot clean (unknown enum e.g. "LOA")        │
+                  │   • Record fails validation twice (unresolvable missing PII)  │
+                  │   • Sensitive field conflicts across sources (Salary)         │
+                  │   • Push 422 Client Error / Target infrastructure outage      │
+                  │                                                               │
+                  │              ─── ESCALATE TO HUMAN REVIEW ───                 │
+                  ├───────────────────────────────────────────────────────────────┤
+                  │              ─── AGENT ACTS AUTONOMOUSLY ───                  │
+                  │                                                               │
                   │   • High-confidence column mapping (margin ≥ 0.20, conf ≥0.75)│
-                  │   • Column date consensus (any single day > 12 proves format│
-                  │   • Safe validation auto-fix succeeds on first pass         │
-                  │   • Exact multi-file duplicates & null gap filling          │
-                  │   • Non-sensitive conflicts resolved by source precedence   │
-                  │   • Push 503 transient failure → exponential retry          │
-                  └─────────────────────────────────────────────────────────────┘
+                  │   • Column date consensus (any single day > 12 proves format  │
+                  │   • Safe validation auto-fix succeeds on first pass           │
+                  │   • Exact multi-file duplicates & null gap filling            │
+                  │   • Non-sensitive conflicts resolved by source precedence     │
+                  │   • Push 503 transient failure → exponential retry            │
+                  └───────────────────────────────────────────────────────────────┘
 ```
 
 ---
