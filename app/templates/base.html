@@ -216,17 +216,6 @@
                     <span id="theme-toggle-icon" class="material-symbols-outlined text-[16px] text-indigo-600">dark_mode</span>
                     <span id="theme-toggle-text" class="hidden sm:inline text-[11px] font-medium">Dark</span>
                 </button>
-
-                <!-- Clear DB Action Button -->
-                <button 
-                    hx-post="/api/db/reset"
-                    hx-confirm="Reset the entire migration database and clear all previous runs?"
-                    onclick="if (window.location.pathname !== '/') { setTimeout(() => window.location.href = '/', 200); }"
-                    class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-error-container/60 hover:bg-error-container text-on-error-container border border-error/20 flex items-center gap-1.5 transition cursor-pointer"
-                    title="Wipe database and restart fresh">
-                    <span class="material-symbols-outlined text-[15px] text-error">delete_sweep</span>
-                    <span class="hidden sm:inline">Clear DB</span>
-                </button>
             </div>
         </div>
     </header>
