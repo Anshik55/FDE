@@ -16,8 +16,8 @@ Built for the **Darwinbox Forward Deployed Engineer (FDE)** take-home challenge.
 ## Key Differentiators & Highlights
 
 1. **Defensible Autonomy Policy:** Grounded in a formal escalation boundary matrix ([DECISIONS.md](DECISIONS.md) & [WRITEUP.md](WRITEUP.md)). Automates verifiable, reversible, low-blast-radius operations; escalates high-blast-radius ambiguities (near-duplicates, sensitive data conflicts, ambiguous dates).
-2. **Delta Solutioning & Resolution Memory:** Human decisions (mapping, enum resolution, date formats) are fingerprinted and persisted as client-scoped rules. On subsequent runs, escalations shrink by **-57%** (7 &rarr; 3 review cards on planted fixtures).
-3. **Append-Only Event Spine:** Every action carries `(before, after, reason, score, actor)`. Backed by SQLite database triggers prohibiting `UPDATE` and `DELETE` on the `events` table with deterministic SHA256 audit replay.
+2. **Delta Solutioning & Resolution Memory:** Human decisions (mapping, enum resolution, date formats) are fingerprinted and persisted as client-scoped rules. On subsequent runs, escalations shrink by **-57%** (7 &rarr; 3 pre-push review cards on planted fixtures; 26 of 29 employees zero-touch).
+3. **Append-Only Event Spine & Idempotency:** Every action carries `(before, after, reason, score, actor)`. Backed by SQLite database triggers prohibiting `UPDATE` and `DELETE` on the `events` table for an immutable audit log, with SHA256 target idempotency keys and offline prompt replay.
 4. **Mock Target API (Darwinbox-shaped) with Fault Injection:** Includes `/stub/employees` with `Idempotency-Key` deduplication, 503 retry with exponential backoff, 422 unprocessable rejection, and batch outage compensating rollback.
 5. **No-Build Reactive Web UI:** Built with FastAPI + Jinja2 + HTMX + Server-Sent Events (SSE) + Tailwind CSS CDN. Zero npm/node build steps required.
 
