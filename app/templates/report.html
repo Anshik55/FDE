@@ -128,38 +128,36 @@
 
     <!-- Screen Report Header & Actions -->
     <div
-        class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
+        class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div>
             <div class="flex items-center gap-2 mb-1">
+                <span class="material-symbols-outlined text-primary text-xl">description</span>
                 <span
-                    class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
                     Handoff Ready
                 </span>
-                <span class="text-xs text-gray-500 font-mono">Run: {{ report.run_id }}</span>
+                <span class="text-xs text-secondary font-mono">Run: {{ report.run_id }}</span>
             </div>
-            <h2 class="text-2xl font-bold text-white tracking-tight">Reconciliation Report & Autonomy Scoreboard</h2>
-            <p class="text-sm text-gray-400 mt-1">
+            <h2 class="text-2xl font-bold font-headline text-on-surface tracking-tight">Reconciliation Report &amp; Autonomy Scoreboard</h2>
+            <p class="text-xs text-secondary mt-1">
                 Full client migration ledger: ingestion deduplication, source precedence audit, and autonomy
                 verification.
             </p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2.5">
             <button onclick="window.history.back()"
-                class="px-3.5 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-lg border border-gray-700 transition flex items-center gap-1.5 cursor-pointer">
-                &larr; Back
+                class="px-3.5 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-xl border border-outline-variant/30 transition flex items-center gap-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[15px]">arrow_back</span>
+                <span>Back</span>
             </button>
             <a href="/audit"
-                class="px-3.5 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-lg border border-gray-700 transition flex items-center gap-1.5">
+                class="px-3.5 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-xl border border-outline-variant/30 transition flex items-center gap-1.5">
                 <span>View Audit Trail</span>
-                <span>&rarr;</span>
+                <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
             </a>
             <button onclick="window.print()"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg shadow-sm shadow-blue-500/20 transition flex items-center gap-1.5 cursor-pointer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
-                    </path>
-                </svg>
+                class="px-4 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-xl shadow-md shadow-primary/20 transition flex items-center gap-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[15px]">print</span>
                 <span>Print / Save PDF</span>
             </button>
         </div>
@@ -167,47 +165,70 @@
 
     <!-- Executive KPI Grid -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Source Rows In</div>
-            <div class="text-2xl font-bold text-white mt-1">{{ report.summary.source_rows_in }}</div>
-            <div class="text-xs text-gray-500 mt-1">From 3 ingested files</div>
+        <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-secondary">Source Rows In</span>
+                <span class="material-symbols-outlined text-primary text-xl">dataset</span>
+            </div>
+            <div>
+                <div class="text-3xl font-bold font-headline text-on-surface tracking-tight">{{ report.summary.source_rows_in }}</div>
+                <div class="text-xs text-secondary/80 mt-1">From ingested files</div>
+            </div>
         </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Canonical Merged</div>
-            <div class="text-2xl font-bold text-indigo-400 mt-1">{{ report.summary.canonical_records_merged }}</div>
-            <div class="text-xs text-gray-500 mt-1">Deduplicated entities</div>
+        <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-secondary">Canonical Merged</span>
+                <span class="material-symbols-outlined text-tertiary text-xl">merge</span>
+            </div>
+            <div>
+                <div class="text-3xl font-bold font-headline text-tertiary tracking-tight">{{ report.summary.canonical_records_merged }}</div>
+                <div class="text-xs text-secondary/80 mt-1">Deduplicated entities</div>
+            </div>
         </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Target Pushed</div>
-            <div class="text-2xl font-bold text-emerald-400 mt-1">{{ report.summary.pushed_to_target }}</div>
-            <div class="text-xs text-gray-500 mt-1">Created in Darwinbox</div>
+        <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-secondary">Target Pushed</span>
+                <span class="material-symbols-outlined text-emerald-600 text-xl">verified</span>
+            </div>
+            <div>
+                <div class="text-3xl font-bold font-headline text-emerald-600 tracking-tight">{{ report.summary.pushed_to_target }}</div>
+                <div class="text-xs text-secondary/80 mt-1">Created in Darwinbox</div>
+            </div>
         </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Escalated / Rejected</div>
-            <div class="text-2xl font-bold text-amber-400 mt-1">{{ report.summary.pending_review +
-                report.summary.rejected_4xx }}</div>
-            <div class="text-xs text-gray-500 mt-1">{{ report.summary.pending_review }} pending, {{
-                report.summary.rejected_4xx }} 4xx</div>
+        <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-secondary">Escalated</span>
+                <span class="material-symbols-outlined text-amber-600 text-xl">notification_important</span>
+            </div>
+            <div>
+                <div class="text-3xl font-bold font-headline text-amber-600 tracking-tight">{{ report.summary.pending_review + report.summary.rejected_4xx }}</div>
+                <div class="text-xs text-secondary/80 mt-1">{{ report.summary.pending_review }} pending, {{ report.summary.rejected_4xx }} 4xx</div>
+            </div>
         </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Autonomy Score</div>
-            <div class="text-2xl font-bold text-blue-400 mt-1">{{ report.autonomy.score }}%</div>
-            <div class="text-xs text-gray-500 mt-1">Automated decisions</div>
+        <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-secondary">Autonomy Score</span>
+                <span class="material-symbols-outlined text-primary text-xl">auto_mode</span>
+            </div>
+            <div>
+                <div class="text-3xl font-bold font-headline text-primary tracking-tight">{{ report.autonomy.score }}%</div>
+                <div class="text-xs text-secondary/80 mt-1">Automated decisions</div>
+            </div>
         </div>
     </div>
 
     <!-- Autonomy Scoreboard Section -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
-        <div class="flex items-center justify-between">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 space-y-5 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
             <div>
-                <h3 class="text-lg font-bold text-white">Criterion 6: Autonomy Scoreboard</h3>
-                <p class="text-xs text-gray-400 mt-0.5">Where the boundary worked: breakdown of autonomous agent actions
+                <h3 class="text-lg font-bold font-headline text-on-surface">Criterion 6: Autonomy Scoreboard</h3>
+                <p class="text-xs text-secondary mt-0.5">Where the boundary worked: breakdown of autonomous agent actions
                     vs learned rules vs human escalations.</p>
             </div>
             <div class="flex items-center gap-4 text-xs font-medium">
-                <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-blue-500 inline-block"></span>
+                <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-primary inline-block"></span>
                     Agent Alone: {{ report.autonomy.agent_actions }}</span>
-                <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-purple-500 inline-block"></span>
+                <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-tertiary inline-block"></span>
                     Learned Rules: {{ report.autonomy.rule_actions }}</span>
                 <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-amber-500 inline-block"></span>
                     Human Escalations: {{ report.autonomy.human_escalated }}</span>
@@ -215,53 +236,52 @@
         </div>
 
         <!-- Progress Bar Visualizer -->
-        <div class="w-full bg-gray-950 rounded-full h-4 flex overflow-hidden border border-gray-800">
+        <div class="w-full bg-surface-container rounded-full h-4 flex overflow-hidden border border-outline-variant/30">
             {% if report.autonomy.total_decisions > 0 %}
-            <div class="bg-blue-500 h-full"
+            <div class="bg-primary h-full"
                 style="width: {{ (report.autonomy.agent_actions / report.autonomy.total_decisions * 100)|round(1) }}%"
                 title="Agent: {{ report.autonomy.agent_actions }}"></div>
-            <div class="bg-purple-500 h-full"
+            <div class="bg-tertiary h-full"
                 style="width: {{ (report.autonomy.rule_actions / report.autonomy.total_decisions * 100)|round(1) }}%"
                 title="Rule: {{ report.autonomy.rule_actions }}"></div>
             <div class="bg-amber-500 h-full"
                 style="width: {{ (report.autonomy.human_escalated / report.autonomy.total_decisions * 100)|round(1) }}%"
                 title="Human: {{ report.autonomy.human_escalated }}"></div>
             {% else %}
-            <div class="bg-blue-500 h-full w-full"></div>
+            <div class="bg-primary h-full w-full"></div>
             {% endif %}
         </div>
 
         <!-- Stage by Stage Breakdown Table -->
         <div class="overflow-x-auto">
             <table class="w-full text-xs text-left">
-                <thead class="text-gray-400 bg-gray-950/60 uppercase tracking-wider border-b border-gray-800">
+                <thead class="text-secondary bg-surface-container-low uppercase tracking-wider border-b border-outline-variant/30 font-mono text-[11px]">
                     <tr>
-                        <th class="py-2.5 px-4">Pipeline Stage</th>
+                        <th class="py-2.5 px-4 font-sans">Pipeline Stage</th>
                         <th class="py-2.5 px-4 text-center">Agent Alone</th>
                         <th class="py-2.5 px-4 text-center">Learned Rules</th>
                         <th class="py-2.5 px-4 text-center">Human Review</th>
                         <th class="py-2.5 px-4 text-right">Stage Autonomy</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-800/60 font-mono">
+                <tbody class="divide-y divide-outline-variant/20 font-mono">
                     {% for stage, counts in report.autonomy.stage_breakdown.items() %}
                     {% set total_stage = counts.agent + counts.rule + counts.human %}
                     {% set stage_pct = ((counts.agent + counts.rule) / total_stage * 100)|round(1) if total_stage > 0
                     else 100.0 %}
-                    <tr class="hover:bg-gray-800/30 transition">
-                        <td class="py-2.5 px-4 font-sans font-semibold text-white uppercase">{{ stage }}</td>
-                        <td class="py-2.5 px-4 text-center text-blue-400">{{ counts.agent }}</td>
-                        <td class="py-2.5 px-4 text-center text-purple-400">{{ counts.rule }}</td>
-                        <td class="py-2.5 px-4 text-center text-amber-400">{{ counts.human }}</td>
+                    <tr class="hover:bg-surface-container-low/60 transition">
+                        <td class="py-2.5 px-4 font-sans font-semibold text-on-surface uppercase">{{ stage }}</td>
+                        <td class="py-2.5 px-4 text-center text-primary font-bold">{{ counts.agent }}</td>
+                        <td class="py-2.5 px-4 text-center text-tertiary font-bold">{{ counts.rule }}</td>
+                        <td class="py-2.5 px-4 text-center text-amber-800 font-bold">{{ counts.human }}</td>
                         <td
-                            class="py-2.5 px-4 text-right font-bold {% if stage_pct >= 90 %}text-emerald-400{% elif stage_pct >= 70 %}text-blue-400{% else %}text-amber-400{% endif %}">
+                            class="py-2.5 px-4 text-right font-bold {% if stage_pct >= 90 %}text-emerald-700{% elif stage_pct >= 70 %}text-primary{% else %}text-amber-800{% endif %}">
                             {{ stage_pct }}%
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="py-4 text-center text-gray-500 font-sans">No stage decision events logged
-                            yet.</td>
+                        <td colspan="5" class="py-4 text-center text-secondary font-sans">No stage decision events logged yet.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -270,141 +290,141 @@
     </div>
 
     <!-- Spot-Check: Source Precedence Conflict Ledger -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 space-y-4 shadow-sm">
         <div>
-            <h3 class="text-lg font-bold text-white">Source Precedence Spot-Check Ledger</h3>
-            <p class="text-xs text-gray-400 mt-0.5">
+            <h3 class="text-lg font-bold font-headline text-on-surface">Source Precedence Spot-Check Ledger</h3>
+            <p class="text-xs text-secondary mt-0.5">
                 Low-stakes non-sensitive conflicts automatically resolved according to client precedence policy:
-                <span class="font-mono text-gray-300">[hris_export &rarr; legacy_crm &rarr; payroll_export]</span>.
+                <span class="font-mono text-on-surface">[hris_export &rarr; legacy_crm &rarr; payroll_export]</span>.
             </p>
         </div>
 
         {% if report.precedence_conflicts %}
-        <div class="overflow-x-auto rounded-lg border border-gray-800">
+        <div class="overflow-x-auto rounded-xl border border-outline-variant/30">
             <table class="w-full text-xs text-left">
-                <thead class="text-gray-400 bg-gray-950 uppercase tracking-wider border-b border-gray-800">
+                <thead class="text-secondary bg-surface-container-low uppercase tracking-wider border-b border-outline-variant/30 font-mono text-[11px]">
                     <tr>
                         <th class="py-2.5 px-4">Employee ID</th>
-                        <th class="py-2.5 px-4">Field</th>
-                        <th class="py-2.5 px-4 text-emerald-400">Winning Source / Value</th>
-                        <th class="py-2.5 px-4 text-gray-500">Overridden Source / Value</th>
-                        <th class="py-2.5 px-4">Resolution Rationale</th>
+                        <th class="py-2.5 px-4 font-sans">Field</th>
+                        <th class="py-2.5 px-4 text-emerald-700">Winning Source / Value</th>
+                        <th class="py-2.5 px-4 text-secondary">Overridden Source / Value</th>
+                        <th class="py-2.5 px-4 font-sans">Resolution Rationale</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-800/60 font-mono">
+                <tbody class="divide-y divide-outline-variant/20 font-mono">
                     {% for c in report.precedence_conflicts %}
-                    <tr class="hover:bg-gray-800/40 transition">
-                        <td class="py-2.5 px-4 font-bold text-white">{{ c.employee_id }}</td>
-                        <td class="py-2.5 px-4 text-blue-300 font-sans">{{ c.field }}</td>
-                        <td class="py-2.5 px-4 text-emerald-300">
+                    <tr class="hover:bg-surface-container-low/60 transition">
+                        <td class="py-2.5 px-4 font-bold text-on-surface">{{ c.employee_id }}</td>
+                        <td class="py-2.5 px-4 text-primary font-sans">{{ c.field }}</td>
+                        <td class="py-2.5 px-4 text-emerald-700">
                             <span class="font-sans font-semibold">{{ c.winning_value }}</span>
-                            <span class="text-[10px] text-emerald-500 block">({{ c.winning_source }})</span>
+                            <span class="text-[10px] text-emerald-700/80 block">({{ c.winning_source }})</span>
                         </td>
-                        <td class="py-2.5 px-4 text-gray-400 line-through">
+                        <td class="py-2.5 px-4 text-secondary line-through">
                             <span class="font-sans">{{ c.losing_value }}</span>
-                            <span class="text-[10px] text-gray-500 block">({{ c.losing_source }})</span>
+                            <span class="text-[10px] text-secondary/70 block">({{ c.losing_source }})</span>
                         </td>
-                        <td class="py-2.5 px-4 text-gray-300 font-sans text-[11px]">{{ c.reason }}</td>
+                        <td class="py-2.5 px-4 text-secondary font-sans text-[11px]">{{ c.reason }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         {% else %}
-        <div class="p-6 text-center text-xs text-gray-500 bg-gray-950/60 rounded-lg border border-gray-800">
+        <div class="p-6 text-center text-xs text-secondary bg-surface-container-low/50 rounded-xl border border-outline-variant/30">
             No source conflicts encountered. All multi-file records were identical or disjoint.
         </div>
         {% endif %}
     </div>
 
     <!-- Dropped Columns Section -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 space-y-4 shadow-sm">
         <div>
-            <h3 class="text-lg font-bold text-white">Dropped Unmapped Columns</h3>
-            <p class="text-xs text-gray-400 mt-0.5">
+            <h3 class="text-lg font-bold font-headline text-on-surface">Dropped Unmapped Columns</h3>
+            <p class="text-xs text-secondary mt-0.5">
                 Columns in source files with no plausible target field. Source data remains retained in audit tables.
             </p>
         </div>
         {% if report.dropped_columns %}
-        <div class="overflow-x-auto rounded-lg border border-gray-800">
+        <div class="overflow-x-auto rounded-xl border border-outline-variant/30">
             <table class="w-full text-xs text-left">
-                <thead class="text-gray-400 bg-gray-950 uppercase tracking-wider border-b border-gray-800">
+                <thead class="text-secondary bg-surface-container-low uppercase tracking-wider border-b border-outline-variant/30 font-mono text-[11px]">
                     <tr>
                         <th class="py-2.5 px-4">Source File</th>
                         <th class="py-2.5 px-4">Column Name</th>
-                        <th class="py-2.5 px-4">Disposition Reason</th>
+                        <th class="py-2.5 px-4 font-sans">Disposition Reason</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-800/60 font-mono">
+                <tbody class="divide-y divide-outline-variant/20 font-mono">
                     {% for d in report.dropped_columns %}
-                    <tr class="hover:bg-gray-800/40 transition">
-                        <td class="py-2.5 px-4 text-gray-300">{{ d.file }}</td>
-                        <td class="py-2.5 px-4 font-bold text-amber-300">{{ d.column }}</td>
-                        <td class="py-2.5 px-4 text-gray-400 font-sans">{{ d.reason }}</td>
+                    <tr class="hover:bg-surface-container-low/60 transition">
+                        <td class="py-2.5 px-4 text-on-surface">{{ d.file }}</td>
+                        <td class="py-2.5 px-4 font-bold text-amber-800">{{ d.column }}</td>
+                        <td class="py-2.5 px-4 text-secondary font-sans">{{ d.reason }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         {% else %}
-        <div class="p-6 text-center text-xs text-gray-500 bg-gray-950/60 rounded-lg border border-gray-800">
+        <div class="p-6 text-center text-xs text-secondary bg-surface-container-low/50 rounded-xl border border-outline-variant/30">
             All ingested columns successfully mapped to target schema fields.
         </div>
         {% endif %}
     </div>
 
     <!-- Per-Record Migration Manifest -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 space-y-4 shadow-sm">
         <div class="flex items-center justify-between">
             <div>
-                <h3 class="text-lg font-bold text-white">Canonical Dataset Manifest</h3>
-                <p class="text-xs text-gray-400 mt-0.5">Per-record push status and provenance.</p>
+                <h3 class="text-lg font-bold font-headline text-on-surface">Canonical Dataset Manifest</h3>
+                <p class="text-xs text-secondary mt-0.5">Per-record push status and provenance.</p>
             </div>
-            <span class="text-xs text-gray-500 font-mono">{{ report.records|length }} Total Records</span>
+            <span class="text-xs text-secondary font-mono">{{ report.records|length }} Total Records</span>
         </div>
 
-        <div class="overflow-x-auto rounded-lg border border-gray-800 max-h-[500px] custom-scroll">
+        <div class="overflow-x-auto rounded-xl border border-outline-variant/30 max-h-[500px] custom-scroll">
             <table class="w-full text-xs text-left">
                 <thead
-                    class="text-gray-400 bg-gray-950 uppercase tracking-wider border-b border-gray-800 sticky top-0 z-10">
+                    class="text-secondary bg-surface-container-low uppercase tracking-wider border-b border-outline-variant/30 sticky top-0 z-10 font-mono text-[11px]">
                     <tr>
                         <th class="py-2.5 px-4">ID</th>
-                        <th class="py-2.5 px-4">Name</th>
+                        <th class="py-2.5 px-4 font-sans">Name</th>
                         <th class="py-2.5 px-4">Email</th>
-                        <th class="py-2.5 px-4">Department</th>
+                        <th class="py-2.5 px-4 font-sans">Department</th>
                         <th class="py-2.5 px-4">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-800/60 font-mono">
+                <tbody class="divide-y divide-outline-variant/20 font-mono">
                     {% for rec in report.records %}
-                    <tr class="hover:bg-gray-800/40 transition">
-                        <td class="py-2.5 px-4 font-bold text-white">{{ rec.canonical_key }}</td>
-                        <td class="py-2.5 px-4 font-sans text-gray-200">{{ rec.name }}</td>
-                        <td class="py-2.5 px-4 text-gray-400">{{ rec.email }}</td>
-                        <td class="py-2.5 px-4 text-blue-300 font-sans">{{ rec.department }}</td>
+                    <tr class="hover:bg-surface-container-low/60 transition">
+                        <td class="py-2.5 px-4 font-bold text-on-surface">{{ rec.canonical_key }}</td>
+                        <td class="py-2.5 px-4 font-sans text-on-surface font-medium">{{ rec.name }}</td>
+                        <td class="py-2.5 px-4 text-secondary">{{ rec.email }}</td>
+                        <td class="py-2.5 px-4 text-primary font-sans">{{ rec.department }}</td>
                         <td class="py-2.5 px-4">
                             {% if rec.status == 'pushed' %}
                             <span
-                                class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
                                 PUSHED
                             </span>
                             {% elif rec.status == 'rejected' %}
                             <span
-                                class="px-2 py-0.5 rounded text-[11px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30">
+                                class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-error/10 text-error border border-error/20">
                                 REJECTED (4XX)
                             </span>
                             {% elif rec.status == 'failed' %}
                             <span
-                                class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-800 border border-amber-500/30">
                                 FAILED
                             </span>
                             {% elif rec.status == 'rolled_back' %}
                             <span
-                                class="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                                class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-700 border border-purple-500/20">
                                 ROLLED BACK
                             </span>
                             {% else %}
-                            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-gray-700 text-gray-300">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-surface-container text-secondary">
                                 {{ rec.status|upper }}
                             </span>
                             {% endif %}
@@ -412,6 +432,7 @@
                     </tr>
                     {% endfor %}
                 </tbody>
+            </table>
         </div>
     </div>
 

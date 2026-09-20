@@ -139,6 +139,48 @@ def resolve_escalation(
     )
     conn.commit()
 
+    # Apply resolved record changes into canonical_records
+    context = json.loads(row["context_json"]) if row["context_json"] else {}
+    if action in ("approve", "correct"):
+        record_data = context.get("record_data")
+        if record_data:
+            if action == "correct" and value:
+                field = context.get("field")
+                errors = context.get("errors", [])
+                if field:
+                    record_data[field] = value
+                elif any("email" in str(e).lower() for e in errors):
+                    record_data["email"] = value
+                elif any("status" in str(e).lower() for e in errors):
+                    record_data["employment_status"] = value
+                elif any("salary" in str(e).lower() for e in errors):
+                    record_data["salary"] = value
+            elif action == "approve":
+                # If approval has proposal canonical value, apply it
+                proposal = json.loads(row["proposal_json"]) if row["proposal_json"] else {}
+                if "canonical_value" in proposal and context.get("field"):
+                    record_data[context["field"]] = proposal["canonical_value"]
+
+            emp_id = str(record_data.get("employee_id") or context.get("entity_key") or "").replace("id:", "").replace("email:", "")
+            if emp_id:
+                cursor.execute(
+                    """
+                    INSERT OR REPLACE INTO canonical_records (
+                        id, run_id, canonical_key, data_json, provenance_json, status
+                    ) VALUES (?, ?, ?, ?, ?, 'ready')
+                    """,
+                    (f"can_{emp_id}", row["run_id"], emp_id, json.dumps(record_data), json.dumps({"source": "human_resolution"})),
+                )
+                conn.commit()
+    elif action == "reject":
+        affected_ids = json.loads(row["affected_ids_json"] or "[]")
+        for a_id in affected_ids:
+            cursor.execute(
+                "UPDATE canonical_records SET status = 'rejected' WHERE run_id = ? AND canonical_key = ?",
+                (row["run_id"], str(a_id).replace("id:", "").replace("email:", "")),
+            )
+        conn.commit()
+
     # If remember is requested, synthesize client-scoped rule
     rule_id = None
     if remember:

@@ -165,65 +165,65 @@ def render_stages_html(
     if not has_run:
         progress_pct = 0
         progress_label = "0% (Ready)"
-        status_badge = '<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-gray-800 text-gray-400 border border-gray-700">Waiting for Run</span>'
+        status_badge = '<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-surface-container text-secondary border border-outline-variant/30">Ready</span>'
     elif is_paused:
         progress_pct = 80
         progress_label = f"Stage 5 (Paused for Review • {pending_count} pending)"
-        status_badge = f'<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse"><span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping mr-1"></span> ⏸️ PAUSED: Human Review Required ({pending_count} items)</span>'
+        status_badge = f'<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-800 border border-amber-500/30 animate-pulse"><span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping mr-1"></span> ⏸️ PAUSED: Human Review Required ({pending_count} items)</span>'
     elif is_running:
         progress_pct = int((active_step / 6) * 100)
         progress_label = f"Stage {active_step} of 6 ({progress_pct}%)"
-        status_badge = f'<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/40 animate-pulse"><span class="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping mr-1"></span> Processing Stage {active_step}...</span>'
+        status_badge = f'<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20 animate-pulse"><span class="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-ping mr-1"></span> Processing Stage {active_step}...</span>'
     else:
         progress_pct = 100
         progress_label = "100% (Completed)"
-        status_badge = '<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✓ All 6 Stages Completed</span>'
+        status_badge = '<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-800 border border-emerald-500/30">✓ All 6 Stages Completed</span>'
 
     cards_html = []
     for s in stages_meta:
         num = s["num"]
         if not has_run:
-            card_class = "border-gray-800 bg-gray-950/60 text-gray-500 opacity-60"
-            badge_class = "bg-gray-800 text-gray-400"
+            card_class = "border-outline-variant/30 bg-surface-container-low/60 text-secondary opacity-70"
+            badge_class = "bg-surface-container text-secondary border border-outline-variant/30"
             badge_html = "Waiting"
-            icon_color = "text-gray-600"
+            icon_color = "text-secondary"
         elif is_paused:
             if num < 5:
-                card_class = "border-emerald-500/30 bg-emerald-950/25 text-emerald-200 shadow-sm"
-                badge_class = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold"
+                card_class = "border-emerald-500/30 bg-emerald-50/50 text-emerald-950 shadow-sm"
+                badge_class = "bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 font-semibold"
                 badge_html = "✓ Done"
-                icon_color = "text-emerald-400"
+                icon_color = "text-emerald-600"
             elif num == 5:
-                card_class = "border-2 border-amber-500 bg-amber-950/40 text-amber-100 ring-2 ring-amber-500/30 shadow-lg shadow-amber-500/20 transform scale-[1.02]"
-                badge_class = "bg-amber-500/30 text-amber-200 border border-amber-400/50 font-bold animate-pulse"
-                badge_html = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping mr-1"></span> ⏸️ Paused'
-                icon_color = "text-amber-400"
+                card_class = "border-2 border-amber-500 bg-amber-50/70 text-amber-950 ring-2 ring-amber-500/20 shadow-md transform scale-[1.01]"
+                badge_class = "bg-amber-500/20 text-amber-800 border border-amber-500/40 font-bold animate-pulse"
+                badge_html = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping mr-1"></span> ⏸️ Paused'
+                icon_color = "text-amber-600"
             else:
-                card_class = "border-gray-800 bg-gray-950/60 text-gray-500 opacity-60"
-                badge_class = "bg-gray-800 text-gray-400"
+                card_class = "border-outline-variant/30 bg-surface-container-low/60 text-secondary opacity-70"
+                badge_class = "bg-surface-container text-secondary border border-outline-variant/30"
                 badge_html = "Waiting for Resume"
-                icon_color = "text-gray-600"
+                icon_color = "text-secondary"
         elif is_running:
             if num < active_step:
-                card_class = "border-emerald-500/30 bg-emerald-950/25 text-emerald-200 shadow-sm"
-                badge_class = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold"
+                card_class = "border-emerald-500/30 bg-emerald-50/50 text-emerald-950 shadow-sm"
+                badge_class = "bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 font-semibold"
                 badge_html = "✓ Done"
-                icon_color = "text-emerald-400"
+                icon_color = "text-emerald-600"
             elif num == active_step:
-                card_class = "border-2 border-blue-500 bg-blue-950/50 text-blue-100 ring-2 ring-blue-500/30 shadow-lg shadow-blue-500/20 transform scale-[1.02]"
-                badge_class = "bg-blue-500/30 text-blue-200 border border-blue-400/50 font-bold animate-pulse"
-                badge_html = '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping mr-1"></span> Active'
-                icon_color = "text-blue-400"
+                card_class = "border-2 border-primary bg-surface-container-lowest text-on-surface ring-2 ring-primary/20 shadow-md shadow-primary/5 transform scale-[1.01]"
+                badge_class = "bg-primary/10 text-primary border border-primary/30 font-bold animate-pulse"
+                badge_html = '<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping mr-1"></span> Active'
+                icon_color = "text-primary"
             else:
-                card_class = "border-gray-800 bg-gray-950/60 text-gray-500 opacity-60"
-                badge_class = "bg-gray-800 text-gray-400"
+                card_class = "border-outline-variant/30 bg-surface-container-low/60 text-secondary opacity-70"
+                badge_class = "bg-surface-container text-secondary border border-outline-variant/30"
                 badge_html = "Waiting"
-                icon_color = "text-gray-600"
+                icon_color = "text-secondary"
         else:
-            card_class = "border-emerald-500/30 bg-emerald-950/25 text-emerald-200 shadow-sm"
-            badge_class = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold"
+            card_class = "border-emerald-500/30 bg-emerald-50/50 text-emerald-950 shadow-sm"
+            badge_class = "bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 font-semibold"
             badge_html = "✓ Done"
-            icon_color = "text-emerald-400"
+            icon_color = "text-emerald-600"
 
         cards_html.append(f"""
         <div id="stage-card-{num}" class="stage-step-card p-3.5 rounded-xl border {card_class} transition-all duration-300 flex flex-col justify-between">
@@ -233,37 +233,37 @@ def render_stages_html(
                         <svg class="w-3.5 h-3.5 {icon_color}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{s['icon']}"></path>
                         </svg>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Stage {num}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-secondary">Stage {num}</span>
                     </div>
                     <span id="stage-badge-{num}" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] {badge_class}">
                         {badge_html}
                     </span>
                 </div>
-                <div class="font-bold text-xs text-white mb-0.5">{s['title']}</div>
-                <div class="text-[10px] text-blue-400 font-medium mb-1">{s['subtitle']}</div>
-                <div class="text-[11px] text-gray-400 leading-snug">{s['desc']}</div>
+                <div class="font-bold text-xs text-on-surface mb-0.5">{s['title']}</div>
+                <div class="text-[10px] text-primary font-medium mb-1">{s['subtitle']}</div>
+                <div class="text-[11px] text-secondary leading-snug">{s['desc']}</div>
             </div>
         </div>
         """)
 
     return f"""
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm">
+    <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-5 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
             <div>
                 <div class="flex items-center gap-2">
-                    <h3 class="text-sm font-semibold text-white tracking-wide">Migration Pipeline Stages</h3>
+                    <h3 class="font-headline text-sm font-bold text-on-surface tracking-tight">Migration Pipeline Stages</h3>
                     {status_badge}
                 </div>
-                <p class="text-xs text-gray-400 mt-0.5">Simple, automated step-by-step progress from raw files to verified Darwinbox employee records.</p>
+                <p class="text-xs text-secondary mt-0.5">Automated step-by-step pipeline from raw files to verified Darwinbox employee records.</p>
             </div>
-            <div class="text-xs font-mono text-gray-400 bg-gray-950 px-3 py-1.5 rounded-lg border border-gray-800 flex items-center gap-2 self-start sm:self-auto">
-                <span class="text-gray-500">Progress:</span>
-                <span id="pipeline-progress-text" class="text-emerald-400 font-bold">{progress_label}</span>
+            <div class="text-xs font-mono text-secondary bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/30 flex items-center gap-2 self-start sm:self-auto">
+                <span>Progress:</span>
+                <span id="pipeline-progress-text" class="text-primary font-bold">{progress_label}</span>
             </div>
         </div>
 
-        <div class="w-full bg-gray-800 rounded-full h-1.5 mb-4 overflow-hidden shadow-inner">
-            <div id="pipeline-progress-bar" class="bg-gradient-to-r from-emerald-500 via-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500" style="width: {progress_pct}%;"></div>
+        <div class="w-full bg-surface-container-high rounded-full h-1.5 mb-4 overflow-hidden shadow-inner">
+            <div id="pipeline-progress-bar" class="bg-primary h-1.5 rounded-full transition-all duration-500" style="width: {progress_pct}%;"></div>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3" id="pipeline-stage-cards">
@@ -288,9 +288,9 @@ def render_inline_escalations_html(run_id: str, escalations: list) -> str:
 
         # Evidence pill tags
         samples_html = "".join([
-            f'<span class="px-2 py-0.5 rounded bg-gray-800 text-gray-200 font-mono text-[11px]">{s}</span>'
+            f'<span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface font-mono text-[11px] border border-outline-variant/30">{s}</span>'
             for s in context.get("sample_values", [])
-        ]) or '<span class="text-gray-500 italic">No sample values available</span>'
+        ]) or '<span class="text-secondary italic">No sample values available</span>'
 
         # Proposal display
         suggested_val = proposal.get("target_field") or proposal.get("canonical_value") or proposal.get("action") or "Review required"
@@ -298,35 +298,35 @@ def render_inline_escalations_html(run_id: str, escalations: list) -> str:
         rationale_val = f'"{proposal["rationale"]}"' if "rationale" in proposal else ""
 
         cards_html.append(f"""
-        <div id="esc-card-{esc_id}" class="bg-gray-900 border border-amber-900/60 rounded-xl p-4 shadow-sm space-y-3">
+        <div id="esc-card-{esc_id}" class="bg-surface-container-lowest border border-outline-variant/40 rounded-2xl p-5 shadow-sm space-y-4">
             <div class="flex items-start justify-between gap-3">
                 <div class="space-y-1">
                     <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-800 border border-amber-500/30">
                             {esc_type}
                         </span>
-                        <span class="text-[10px] text-gray-400 font-mono">Group: {esc['group_key']}</span>
+                        <span class="text-[11px] text-secondary font-mono">Group: {esc['group_key']}</span>
                     </div>
-                    <h4 class="text-xs font-bold text-white">{context.get('title', esc_type)}</h4>
+                    <h4 class="text-sm font-bold text-on-surface font-headline">{context.get('title', esc_type)}</h4>
                 </div>
-                <div class="text-[11px] text-gray-400 font-medium whitespace-nowrap">
-                    Impact: <span class="text-amber-300 font-semibold">{affected_count} records</span>
+                <div class="text-xs text-secondary font-medium whitespace-nowrap">
+                    Impact: <span class="text-amber-800 font-bold">{affected_count} records</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-950/80 p-3 rounded-lg border border-gray-800 text-xs">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-surface-container-low/80 p-3.5 rounded-xl border border-outline-variant/20 text-xs">
                 <div>
-                    <span class="text-gray-400 font-semibold block mb-1 text-[10px] uppercase tracking-wider">Observable Evidence:</span>
-                    <div class="flex flex-wrap gap-1">
+                    <span class="text-secondary font-semibold block mb-1 text-[10px] uppercase tracking-wider">Observable Evidence:</span>
+                    <div class="flex flex-wrap gap-1.5">
                         {samples_html}
                     </div>
                 </div>
                 <div>
-                    <span class="text-gray-400 font-semibold block mb-1 text-[10px] uppercase tracking-wider">AI Proposed Action:</span>
-                    <div class="p-2 rounded bg-blue-950/40 border border-blue-800/40 text-blue-200 text-xs">
-                        <div class="font-semibold text-white">Suggested: {suggested_val}</div>
-                        {f'<div class="text-blue-300 text-[10px] mt-0.5">{score_val}</div>' if score_val else ''}
-                        {f'<div class="text-gray-300 text-[10px] mt-0.5 italic">{rationale_val}</div>' if rationale_val else ''}
+                    <span class="text-secondary font-semibold block mb-1 text-[10px] uppercase tracking-wider">AI Proposed Action:</span>
+                    <div class="p-3 rounded-xl bg-primary/5 border border-primary/20 text-on-surface text-xs">
+                        <div class="font-bold text-on-surface">Suggested: {suggested_val}</div>
+                        {f'<div class="text-primary text-[10px] mt-0.5 font-semibold">{score_val}</div>' if score_val else ''}
+                        {f'<div class="text-secondary text-[11px] mt-0.5 italic">{rationale_val}</div>' if rationale_val else ''}
                     </div>
                 </div>
             </div>
@@ -335,14 +335,14 @@ def render_inline_escalations_html(run_id: str, escalations: list) -> str:
                 hx-post="/api/escalations/{esc_id}/resolve" 
                 hx-target="#esc-card-{esc_id}" 
                 hx-swap="outerHTML"
-                class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-800 text-xs">
-                <div class="flex items-center gap-3 text-gray-300">
-                    <label class="flex items-center gap-1.5 cursor-pointer text-[11px]">
-                        <input type="checkbox" name="apply_to_group" checked class="rounded bg-gray-800 border-gray-700 text-blue-600 focus:ring-0">
+                class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-outline-variant/30 text-xs">
+                <div class="flex items-center gap-3 text-secondary">
+                    <label class="flex items-center gap-1.5 cursor-pointer text-xs">
+                        <input type="checkbox" name="apply_to_group" checked class="rounded border-outline-variant text-primary focus:ring-0">
                         Apply to all {affected_count} rows
                     </label>
-                    <label class="flex items-center gap-1.5 cursor-pointer text-[11px]">
-                        <input type="checkbox" name="remember" checked class="rounded bg-gray-800 border-gray-700 text-blue-600 focus:ring-0">
+                    <label class="flex items-center gap-1.5 cursor-pointer text-xs">
+                        <input type="checkbox" name="remember" checked class="rounded border-outline-variant text-primary focus:ring-0">
                         Remember as rule
                     </label>
                 </div>
@@ -352,14 +352,34 @@ def render_inline_escalations_html(run_id: str, escalations: list) -> str:
                         type="submit" 
                         name="action" 
                         value="approve" 
-                        class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-lg transition active:scale-95 shadow-sm cursor-pointer">
-                        ✓ Approve AI Proposal
+                        class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition active:scale-95 shadow-sm cursor-pointer flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">check</span>
+                        <span>Approve AI Proposal</span>
                     </button>
+
+                    <!-- Correction Input & Disabled Button until typed -->
+                    <div class="flex items-center gap-1.5">
+                        <input 
+                            type="text" 
+                            name="correct_value" 
+                            placeholder="Enter correction..." 
+                            oninput="const btn = this.nextElementSibling; if(btn){{ btn.disabled = !this.value.trim(); if(this.value.trim()){{ btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-surface-container-high', 'text-secondary/50'); btn.classList.add('bg-primary', 'hover:bg-primary/90', 'text-white', 'cursor-pointer'); }} else {{ btn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-surface-container-high', 'text-secondary/50'); btn.classList.remove('bg-primary', 'hover:bg-primary/90', 'text-white', 'cursor-pointer'); }} }}"
+                            class="bg-surface-container border border-outline-variant/60 text-on-surface text-xs rounded-xl px-3 py-2 w-36 focus:border-primary outline-none">
+                        <button 
+                            type="submit" 
+                            name="action" 
+                            value="correct" 
+                            disabled
+                            class="px-3 py-2 bg-surface-container-high text-secondary/50 font-semibold text-xs rounded-xl transition opacity-50 cursor-not-allowed">
+                            Correct
+                        </button>
+                    </div>
+
                     <button 
                         type="submit" 
                         name="action" 
                         value="reject" 
-                        class="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 text-red-300 font-semibold text-xs rounded-lg transition active:scale-95 cursor-pointer">
+                        class="px-3 py-2 bg-error/10 hover:bg-error/20 border border-error/20 text-error font-semibold text-xs rounded-xl transition active:scale-95 cursor-pointer">
                         Reject
                     </button>
                 </div>
@@ -367,33 +387,52 @@ def render_inline_escalations_html(run_id: str, escalations: list) -> str:
         </div>
         """)
 
+    has_pending = len(escalations) > 0
+    if has_pending:
+        resume_btn_html = f"""
+        <button 
+            id="resume-pipeline-btn"
+            type="button"
+            disabled
+            title="Please resolve all pending decisions before resuming migration"
+            class="queue-resume-btn px-4 py-2 bg-surface-container-high border border-outline-variant/40 text-secondary font-bold text-xs rounded-xl flex items-center gap-2 transition opacity-60 cursor-not-allowed whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px] text-amber-600">warning</span>
+            <span>{len(escalations)} Decisions Pending (Resolve all to resume)</span>
+        </button>
+        """
+    else:
+        resume_btn_html = f"""
+        <button 
+            id="resume-pipeline-btn"
+            hx-post="/api/pipeline/resume/{run_id}"
+            hx-target="#run-container"
+            hx-swap="outerHTML"
+            class="queue-resume-btn px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 flex items-center gap-2 transition active:scale-95 cursor-pointer whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+            <span>Resume Pipeline &amp; Push to Darwinbox</span>
+        </button>
+        """
+
     return f"""
     <!-- Human Intervention Panel (Inline on Dashboard) -->
-    <div class="bg-amber-950/20 border-2 border-amber-500/60 rounded-xl p-5 shadow-lg shadow-amber-500/5 space-y-4" id="human-intervention-panel">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-800/40">
+    <div class="bg-amber-500/5 border-2 border-amber-500/30 rounded-2xl p-5 shadow-sm space-y-4" id="human-intervention-panel">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-500/20">
             <div class="flex items-center gap-3">
                 <span class="flex h-3 w-3 relative">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
                 </span>
                 <div>
-                    <h3 class="text-sm font-bold text-amber-200 tracking-wide uppercase">
-                        ⏸️ Human Intervention Required — Pipeline Paused
+                    <h3 class="text-sm font-bold text-amber-900 font-headline tracking-wide uppercase">
+                        Human Intervention Required — Pipeline Paused
                     </h3>
-                    <p class="text-xs text-amber-300/80 mt-0.5">
+                    <p class="text-xs text-amber-800/80 mt-0.5">
                         The agent paused before target push. Review & approve decisions below, then click Resume to push verified records.
                     </p>
                 </div>
             </div>
 
-            <button 
-                hx-post="/api/pipeline/resume/{run_id}"
-                hx-target="#run-container"
-                hx-swap="outerHTML"
-                class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-lg shadow-md shadow-emerald-500/20 flex items-center gap-2 transition active:scale-95 cursor-pointer whitespace-nowrap">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
-                <span>▶️ Resume Pipeline &amp; Push to Darwinbox</span>
-            </button>
+            {resume_btn_html}
         </div>
 
         <div class="space-y-3" id="inline-escalations-list">
@@ -452,27 +491,27 @@ def render_run_container_html(
     """Helper to render the reactive #run-container partial."""
     banner_html = ""
     if banner_msg:
-        banner_bg = "bg-amber-950/60 border-amber-800/60 text-amber-200" if is_paused else "bg-blue-950/60 border-blue-800/60 text-blue-200"
-        dot_bg = "bg-amber-400" if is_paused else "bg-blue-400"
+        banner_bg = "bg-amber-500/10 border-amber-500/30 text-amber-900" if is_paused else "bg-primary/10 border-primary/20 text-primary"
+        dot_bg = "bg-amber-500" if is_paused else "bg-primary"
         banner_html = f"""
-        <div class="p-3.5 rounded-lg {banner_bg} border text-xs flex items-center justify-between shadow-sm">
+        <div class="p-3.5 rounded-xl {banner_bg} border text-xs flex items-center justify-between shadow-sm">
             <span class="flex items-center gap-2">
                 <span class="h-2 w-2 rounded-full {dot_bg}"></span>
-                <span>{banner_msg}</span>
+                <span class="font-medium">{banner_msg}</span>
             </span>
-            <span class="text-blue-400 font-mono text-[11px]">Run: {run_id}</span>
+            <span class="font-mono text-[11px] font-semibold">Run: {run_id}</span>
         </div>
         """
 
     rendered_events = "".join([
-        f"""<div class="p-2.5 rounded-lg bg-gray-950/80 border border-gray-800/80 flex items-start gap-3 hover:border-gray-700 transition" data-stage="{ev['stage']}" data-type="{ev['type']}">
-            <span class="text-gray-500 whitespace-nowrap">{ev['ts'][11:19]}</span>
-            <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold {'bg-blue-500/20 text-blue-300 border border-blue-500/30' if ev['actor'] == 'agent' else 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">{ev['actor'].upper()}</span>
-            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-800 text-gray-300">{ev['type']}</span>
-            <span class="text-gray-300 flex-1 break-words font-sans">{ev['reason'] or ev['type']}</span>
+        f"""<div class="p-3 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 flex items-start gap-3 hover:bg-surface-container transition" data-stage="{ev['stage']}" data-type="{ev['type']}">
+            <span class="text-secondary/70 whitespace-nowrap font-mono text-[11px]">{ev['ts'][11:19]}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase {'bg-primary/10 text-primary border border-primary/20' if ev['actor'] == 'agent' else 'bg-amber-500/10 text-amber-700 border border-amber-500/30'}">{ev['actor'].upper()}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-surface-container-highest/60 text-secondary">{ev['type']}</span>
+            <span class="text-on-surface/90 flex-1 break-words font-sans text-xs">{ev['reason'] or ev['type']}</span>
         </div>"""
         for ev in events
-    ]) or """<div class="text-center py-10 text-gray-500 font-sans text-sm">No events recorded. Upload new files or run sample fixtures to begin.</div>"""
+    ]) or """<div class="text-center py-10 text-secondary font-sans text-sm">No events recorded. Upload new files or run sample fixtures to begin.</div>"""
 
     if pending_escalations is None and run_id and run_id != "No Active Run":
         conn = get_db_connection()
@@ -495,26 +534,55 @@ def render_run_container_html(
     return f"""
     <div id="run-container" class="space-y-6">
         {banner_html}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Source Records In</div>
-                <div class="text-2xl font-bold text-white mt-1">{stats['total_source_rows']}</div>
-                <div class="text-xs text-gray-500 mt-1">Processed rows</div>
+        <!-- Bento Metric Ribbon -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-secondary">Source Records In</span>
+                    <span class="material-symbols-outlined text-primary text-xl">dataset</span>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold font-headline text-on-surface tracking-tight">{stats['total_source_rows']}</div>
+                    <div class="text-xs text-secondary/80 mt-1 flex items-center gap-1">
+                        <span>Multi-source legacy ingested</span>
+                    </div>
+                </div>
             </div>
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Autonomy Score</div>
-                <div class="text-2xl font-bold text-emerald-400 mt-1">{stats['autonomy_score']}%</div>
-                <div class="text-xs text-gray-500 mt-1">Automated resolutions</div>
+            <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-secondary">Autonomy Score</span>
+                    <span class="material-symbols-outlined text-emerald-600 text-xl">verified</span>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold font-headline text-emerald-600 tracking-tight">{stats['autonomy_score']}%</div>
+                    <div class="text-xs text-secondary/80 mt-1 flex items-center gap-1">
+                        <span>Automated resolutions</span>
+                    </div>
+                </div>
             </div>
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Pending Escalations</div>
-                <div class="text-2xl font-bold text-amber-400 mt-1">{stats['pending_escalations']}</div>
-                <div class="text-xs text-gray-500 mt-1">Requires human review</div>
+            <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-secondary">Pending Escalations</span>
+                    <span class="material-symbols-outlined text-amber-600 text-xl">notification_important</span>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold font-headline text-amber-600 tracking-tight">{stats['pending_escalations']}</div>
+                    <div class="text-xs text-secondary/80 mt-1 flex items-center gap-1">
+                        <span>Requires human review</span>
+                    </div>
+                </div>
             </div>
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Pushed to Darwinbox</div>
-                <div class="text-2xl font-bold text-blue-400 mt-1">{stats['pushed_records']}</div>
-                <div class="text-xs text-gray-500 mt-1">Target API verified</div>
+            <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-secondary">Target Synced</span>
+                    <span class="material-symbols-outlined text-primary text-xl">published_with_changes</span>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold font-headline text-primary tracking-tight">{stats['pushed_records']}</div>
+                    <div class="text-xs text-secondary/80 mt-1 flex items-center gap-1">
+                        <span>Darwinbox v2.4 verified</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -522,16 +590,16 @@ def render_run_container_html(
 
         {escalations_panel}
 
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm">
-            <div class="flex items-center justify-between pb-3 border-b border-gray-800 mb-4">
+        <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-outline-variant/30 mb-4">
                 <div class="flex items-center gap-2">
                     <span class="relative flex h-2.5 w-2.5">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                     </span>
-                    <h3 class="text-sm font-semibold text-white">Append-Only Event Stream</h3>
+                    <h3 class="text-sm font-bold font-headline text-on-surface">Append-Only Event Stream</h3>
                 </div>
-                <span class="text-xs text-gray-500 font-mono">Run: {run_id}</span>
+                <span class="text-xs text-secondary font-mono">Run: {run_id}</span>
             </div>
             <div hx-ext="sse" {sse_connect_attr} sse-swap="event" class="space-y-2.5 max-h-[480px] overflow-y-auto custom-scroll pr-1 font-mono text-xs" id="events-feed">
                 {rendered_events}
@@ -598,8 +666,26 @@ async def upload_and_run(files: List[UploadFile] = File(...)):
 @app.post("/api/pipeline/resume/{run_id}", response_class=HTMLResponse)
 async def resume_pipeline_endpoint(run_id: str):
     """Resume a paused pipeline run after human review and push records to target API."""
-    result = await asyncio.to_thread(resume_pipeline, run_id=run_id)
     conn = get_db_connection()
+    pending_row = conn.execute(
+        "SELECT COUNT(*) as cnt FROM escalations WHERE run_id = ? AND status = 'pending'", (run_id,)
+    ).fetchone()
+    pending_cnt = pending_row["cnt"] if pending_row else 0
+
+    if pending_cnt > 0:
+        stats = get_dashboard_stats(conn, run_id)
+        events = tail_events(conn, run_id, last_id=0, limit=50)
+        pending_escs = get_pending_escalations(conn, run_id)
+        return HTMLResponse(render_run_container_html(
+            run_id,
+            stats,
+            events,
+            banner_msg=f"⚠️ Cannot resume: {pending_cnt} decision(s) are still pending human review. Please resolve all cards below first.",
+            is_paused=True,
+            pending_escalations=pending_escs,
+        ))
+
+    result = await asyncio.to_thread(resume_pipeline, run_id=run_id)
     stats = get_dashboard_stats(conn, run_id)
     events = tail_events(conn, run_id, last_id=0, limit=50)
     return HTMLResponse(render_run_container_html(
@@ -646,17 +732,17 @@ async def stream_events(run_id: str, from_id: Optional[int] = None):
                 for ev in new_events:
                     last_id = ev["id"]
                     actor_badge = (
-                        '<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">AGENT</span>'
+                        '<span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase bg-primary/10 text-primary border border-primary/20">AGENT</span>'
                         if ev['actor'] == 'agent'
-                        else '<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">HUMAN</span>'
+                        else '<span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase bg-amber-500/10 text-amber-700 border border-amber-500/30">HUMAN</span>'
                     )
-                    score_span = f'<span class="text-emerald-400 font-semibold whitespace-nowrap">score: {ev["score"]:.2f}</span>' if ev["score"] else ''
+                    score_span = f'<span class="text-emerald-600 font-semibold font-mono text-[11px] whitespace-nowrap">score: {ev["score"]:.2f}</span>' if ev["score"] else ''
                     html_item = (
-                        f'<div class="p-2.5 rounded-lg bg-gray-950/80 border border-gray-800/80 flex items-start gap-3 hover:border-gray-700 transition" data-stage="{ev["stage"]}" data-type="{ev["type"]}">'
-                        f'<span class="text-gray-500 whitespace-nowrap">{ev["ts"][11:19]}</span>'
+                        f'<div class="p-3 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 flex items-start gap-3 hover:bg-surface-container transition" data-stage="{ev["stage"]}" data-type="{ev["type"]}">'
+                        f'<span class="text-secondary/70 whitespace-nowrap font-mono text-[11px]">{ev["ts"][11:19]}</span>'
                         f'{actor_badge}'
-                        f'<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-800 text-gray-300">{ev["type"]}</span>'
-                        f'<span class="text-gray-300 flex-1 break-words font-sans">{ev["reason"] or ev["type"]}</span>'
+                        f'<span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-surface-container-highest/60 text-secondary">{ev["type"]}</span>'
+                        f'<span class="text-on-surface/90 flex-1 break-words font-sans text-xs">{ev["reason"] or ev["type"]}</span>'
                         f'{score_span}'
                         f'</div>'
                     )
@@ -731,22 +817,53 @@ async def resolve_escalation_endpoint(
     )
 
     # Return updated resolved card partial
+    run_row = conn.execute("SELECT run_id FROM escalations WHERE id = ?", (esc_id,)).fetchone()
+    r_id = run_row["run_id"] if run_row else ""
+    pending_cnt = 0
+    if r_id:
+        pending_cnt = conn.execute("SELECT COUNT(*) as c FROM escalations WHERE run_id = ? AND status = 'pending'", (r_id,)).fetchone()["c"]
+
+    unlock_script = ""
+    if pending_cnt == 0 and r_id:
+        unlock_script = f"""
+        <script>
+            document.querySelectorAll('#resume-pipeline-btn, #queue-resume-btn, .queue-resume-btn').forEach(btn => {{
+                btn.disabled = false;
+                btn.classList.remove('opacity-60', 'cursor-not-allowed', 'bg-surface-container-high', 'text-secondary');
+                btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'text-white', 'shadow-md', 'cursor-pointer');
+                btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">play_arrow</span><span>▶ All Decisions Resolved — Click to Resume &amp; Push</span>';
+                btn.setAttribute('hx-post', '/api/pipeline/resume/{r_id}');
+                if (window.htmx) htmx.process(btn);
+            }});
+        </script>
+        """
+    elif r_id:
+        unlock_script = f"""
+        <script>
+            document.querySelectorAll('#resume-pipeline-btn span:last-child, #queue-resume-btn span:last-child, .queue-resume-btn span:last-child').forEach(sp => {{
+                sp.textContent = '{pending_cnt} Decisions Pending (Resolve all to resume)';
+            }});
+        </script>
+        """
+
     return HTMLResponse(f"""
-    <div id="esc-card-{esc_id}" class="bg-gray-950 border border-emerald-900/60 rounded-xl p-5 shadow-sm space-y-2 opacity-80">
+    <div id="esc-card-{esc_id}" class="bg-surface-container-lowest border border-emerald-500/30 rounded-2xl p-4 shadow-sm space-y-2">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                    ✓ Resolved ({action.upper()})
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                    <span>Resolved ({action.upper()})</span>
                 </span>
-                <span class="text-xs text-gray-400 font-mono">ID: {esc_id[:8]}</span>
+                <span class="text-xs text-secondary font-mono">ID: {esc_id[:8]}</span>
             </div>
-            <span class="text-xs text-gray-500">Just now</span>
+            <span class="text-xs text-secondary/70">Just now</span>
         </div>
-        <p class="text-xs text-gray-300 font-sans">
-            Action: <strong>{action}</strong> {f'- Value: {correct_value}' if correct_value else ''} 
-            {'• Saved to client resolution memory' if remember else ''}
+        <p class="text-xs text-on-surface/80 font-sans">
+            Action: <strong class="text-on-surface">{action}</strong> {f'- Value: <code class="px-1.5 py-0.5 bg-surface-container rounded text-primary font-mono text-[11px]">{correct_value}</code>' if correct_value else ''} 
+            {'<span class="ml-2 text-primary font-medium">• Saved to client resolution memory</span>' if remember else ''}
         </p>
     </div>
+    {unlock_script}
     """)
 
 

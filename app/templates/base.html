@@ -3,92 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Darwinbox Data Migration Agent{% endblock %}</title>
+    <title>{% block title %}DarwinSync AI — Autonomous Client Data Migration{% endblock %}</title>
+
+    <!-- Instant Theme Loader (Avoids flash of unstyled content) -->
+    <script>
+        (function() {
+            try {
+                const saved = localStorage.getItem('theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (saved === 'dark' || (!saved && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch(e) {}
+        })();
+    </script>
+
+    <!-- Material Symbols & Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"/>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- HTMX CDN -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        "surface": "rgb(var(--color-surface) / <alpha-value>)",
+                        "surface-container-lowest": "rgb(var(--color-surface-container-lowest) / <alpha-value>)",
+                        "surface-container-low": "rgb(var(--color-surface-container-low) / <alpha-value>)",
+                        "surface-container": "rgb(var(--color-surface-container) / <alpha-value>)",
+                        "surface-container-high": "rgb(var(--color-surface-container-high) / <alpha-value>)",
+                        "surface-container-highest": "rgb(var(--color-surface-container-highest) / <alpha-value>)",
+                        "on-surface": "rgb(var(--color-on-surface) / <alpha-value>)",
+                        "on-surface-variant": "rgb(var(--color-on-surface-variant) / <alpha-value>)",
+                        "secondary": "rgb(var(--color-secondary) / <alpha-value>)",
+                        "outline": "rgb(var(--color-outline) / <alpha-value>)",
+                        "outline-variant": "rgb(var(--color-outline-variant) / <alpha-value>)",
+                        "primary": "rgb(var(--color-primary) / <alpha-value>)",
+                        "primary-container": "rgb(var(--color-primary-container) / <alpha-value>)",
+                        "on-primary": "#ffffff",
+                        "error": "rgb(var(--color-error) / <alpha-value>)",
+                        "error-container": "rgb(var(--color-error-container) / <alpha-value>)",
+                        "on-error-container": "rgb(var(--color-on-error-container) / <alpha-value>)",
+                        "tertiary": "rgb(var(--color-tertiary) / <alpha-value>)",
+                        "tertiary-container": "#645efb",
+                        "tertiary-fixed": "#e2dfff",
+                    },
+                    fontFamily: {
+                        sans: ["'Hanken Grotesk'", "sans-serif"],
+                        headline: ["'Manrope'", "sans-serif"],
+                        mono: ["'JetBrains Mono'", "monospace"],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- HTMX CDN & SSE extension -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <!-- HTMX SSE extension -->
     <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/sse.js"></script>
+
     <style>
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: #1f2937; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+        :root {
+            --color-surface: 248 249 255;
+            --color-surface-container-lowest: 255 255 255;
+            --color-surface-container-low: 239 244 255;
+            --color-surface-container: 229 238 255;
+            --color-surface-container-high: 220 233 255;
+            --color-surface-container-highest: 211 228 254;
+            --color-on-surface: 11 28 48;
+            --color-on-surface-variant: 66 71 84;
+            --color-secondary: 86 94 116;
+            --color-outline: 114 119 133;
+            --color-outline-variant: 194 198 214;
+            --color-primary: 0 88 190;
+            --color-primary-container: 33 112 228;
+            --color-error: 186 26 26;
+            --color-error-container: 255 218 214;
+            --color-on-error-container: 147 0 10;
+            --color-tertiary: 75 65 225;
+        }
+
+        html.dark {
+            --color-surface: 11 15 25;
+            --color-surface-container-lowest: 17 24 39;
+            --color-surface-container-low: 23 32 51;
+            --color-surface-container: 30 41 59;
+            --color-surface-container-high: 44 58 79;
+            --color-surface-container-highest: 59 75 100;
+            --color-on-surface: 241 245 249;
+            --color-on-surface-variant: 203 213 225;
+            --color-secondary: 148 163 184;
+            --color-outline: 100 116 139;
+            --color-outline-variant: 51 65 85;
+            --color-primary: 59 130 246;
+            --color-primary-container: 37 99 235;
+            --color-error: 248 113 113;
+            --color-error-container: 69 10 10;
+            --color-on-error-container: 254 202 202;
+            --color-tertiary: 129 140 248;
+        }
+
+        body {
+            font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: rgb(var(--color-surface));
+            color: rgb(var(--color-on-surface));
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        h1, h2, h3, h4, .font-headline {
+            font-family: 'Manrope', sans-serif;
+        }
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgb(var(--color-surface-container-low)); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgb(var(--color-outline-variant)); border-radius: 3px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgb(var(--color-outline)); }
     </style>
     {% block head %}{% endblock %}
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col font-sans antialiased">
-    <!-- Navigation Header -->
-    <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-50 no-print">
-        <div class="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <a href="/" class="flex items-center space-x-3 group">
-                    <div class="h-9 w-9 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-lg shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition">
-                        ⚡
+<body class="bg-surface text-on-surface min-h-screen flex flex-col antialiased">
+    <!-- Executive Top Header Bar -->
+    <header class="sticky top-0 w-full z-50 bg-surface-container-lowest border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(0,0,0,0.04)] no-print transition-colors duration-200">
+        <div class="h-16 w-full px-4 lg:px-6 flex items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 shrink-0">
+                <a href="/" class="flex items-center gap-2 group">
+                    <div class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center shadow-sm shadow-primary/20 group-hover:scale-105 transition">
+                        <span class="material-symbols-outlined text-[20px]">sync_alt</span>
                     </div>
-                    <div>
-                        <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
-                            DataBridge AI
-                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">Autonomous Migration</span>
-                        </h1>
-                        <p class="text-[11px] text-gray-400">Darwinbox Forward Deployed Engineer Ledger</p>
+                    <div class="flex flex-col">
+                        <span class="font-headline text-base font-extrabold text-on-surface tracking-tight leading-none">
+                            DarwinSync<span class="text-primary ml-0.5">AI</span>
+                        </span>
+                        <span class="font-mono text-[9px] font-semibold text-secondary uppercase tracking-widest leading-tight">
+                            Autonomous Migration
+                        </span>
                     </div>
                 </a>
+
+                <!-- Client Badge -->
+                <div class="hidden xl:flex items-center gap-2 pl-3 py-1 pr-3 bg-surface-container-low rounded-full border border-surface-container-high/60">
+                    <span class="material-symbols-outlined text-primary text-[15px]">corporate_fare</span>
+                    <span class="text-xs text-on-surface-variant">
+                        Client: <strong class="text-on-surface font-semibold">Acme Corp</strong>
+                        <span class="text-secondary font-mono text-[11px]">(Multi-Source CSV &rarr; Darwinbox v2.4)</span>
+                    </span>
+                </div>
             </div>
 
-            <nav class="flex items-center space-x-1.5">
-                <!-- Run Monitor Tab -->
-                <a href="/" class="px-3 py-1.5 rounded-md text-xs font-semibold transition {% if request.url.path == '/' %}bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm{% else %}text-gray-300 hover:text-white hover:bg-gray-800/70 border border-transparent{% endif %}">
-                    Run Monitor
+            <!-- Central Pill Navigation -->
+            <nav class="hidden md:flex items-center bg-surface-container p-1 rounded-xl border border-surface-container-high shrink-0">
+                <!-- Run Monitor -->
+                <a href="/" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition {% if request.url.path == '/' %}bg-surface-container-lowest text-primary shadow-[0_1px_3px_rgba(15,23,42,0.06)]{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60{% endif %}">
+                    <span class="material-symbols-outlined text-[15px] {% if request.url.path == '/' %}text-primary{% else %}text-secondary{% endif %}">dashboard</span>
+                    <span>Run Monitor</span>
                 </a>
 
-                <!-- Review Queue Tab -->
-                <a href="/queue" class="px-3 py-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1.5 {% if request.url.path.startswith('/queue') %}bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm{% else %}text-gray-300 hover:text-white hover:bg-gray-800/70 border border-transparent{% endif %}">
+                <!-- Review Queue -->
+                <a href="/queue" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition {% if request.url.path.startswith('/queue') %}bg-surface-container-lowest text-primary shadow-[0_1px_3px_rgba(15,23,42,0.06)]{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60{% endif %}">
+                    <span class="material-symbols-outlined text-[15px] {% if request.url.path.startswith('/queue') %}text-primary{% else %}text-secondary{% endif %}">psychology</span>
                     <span>Review Queue</span>
                 </a>
 
-                <!-- Processed Target Records Tab -->
-                <a href="/records" class="px-3 py-1.5 rounded-md text-xs font-semibold transition {% if request.url.path.startswith('/records') %}bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm{% else %}text-gray-300 hover:text-white hover:bg-gray-800/70 border border-transparent{% endif %}">
-                    Processed Data
+                <!-- Processed Data -->
+                <a href="/records" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition {% if request.url.path.startswith('/records') %}bg-surface-container-lowest text-primary shadow-[0_1px_3px_rgba(15,23,42,0.06)]{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60{% endif %}">
+                    <span class="material-symbols-outlined text-[15px] {% if request.url.path.startswith('/records') %}text-primary{% else %}text-secondary{% endif %}">table_chart</span>
+                    <span>Processed Data</span>
                 </a>
 
-                <!-- Audit Log Tab -->
-                <a href="/audit" class="px-3 py-1.5 rounded-md text-xs font-semibold transition {% if request.url.path.startswith('/audit') %}bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm{% else %}text-gray-300 hover:text-white hover:bg-gray-800/70 border border-transparent{% endif %}">
-                    Audit Log
+                <!-- Audit Log -->
+                <a href="/audit" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition {% if request.url.path.startswith('/audit') %}bg-surface-container-lowest text-primary shadow-[0_1px_3px_rgba(15,23,42,0.06)]{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60{% endif %}">
+                    <span class="material-symbols-outlined text-[15px] {% if request.url.path.startswith('/audit') %}text-primary{% else %}text-secondary{% endif %}">verified</span>
+                    <span>Audit Log</span>
                 </a>
 
-                <!-- Reconciliation Report Tab -->
-                <a href="/report" class="px-3 py-1.5 rounded-md text-xs font-semibold transition {% if request.url.path.startswith('/report') %}bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm{% else %}text-gray-300 hover:text-white hover:bg-gray-800/70 border border-transparent{% endif %}">
-                    Reconciliation Report
+                <!-- Reconciliation Report -->
+                <a href="/report" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition {% if request.url.path.startswith('/report') %}bg-surface-container-lowest text-primary shadow-[0_1px_3px_rgba(15,23,42,0.06)]{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60{% endif %}">
+                    <span class="material-symbols-outlined text-[15px] {% if request.url.path.startswith('/report') %}text-primary{% else %}text-secondary{% endif %}">description</span>
+                    <span>Report</span>
                 </a>
 
-                <!-- Learned Rules Tab -->
-                <a href="/rules" class="px-3 py-1.5 rounded-md text-xs font-semibold transition {% if request.url.path.startswith('/rules') %}bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm{% else %}text-gray-300 hover:text-white hover:bg-gray-800/70 border border-transparent{% endif %}">
-                    Learned Rules
+                <!-- Learned Rules -->
+                <a href="/rules" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition {% if request.url.path.startswith('/rules') %}bg-surface-container-lowest text-primary shadow-[0_1px_3px_rgba(15,23,42,0.06)]{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60{% endif %}">
+                    <span class="material-symbols-outlined text-[15px] {% if request.url.path.startswith('/rules') %}text-primary{% else %}text-secondary{% endif %}">auto_fix_high</span>
+                    <span>Learned Rules</span>
                 </a>
+            </nav>
+
+            <!-- Right Actions & Target Meta -->
+            <div class="flex items-center gap-2.5 shrink-0">
+                <div class="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-container-low rounded-xl border border-surface-container-high text-xs">
+                    <span class="material-symbols-outlined text-secondary text-[15px]">dns</span>
+                    <span class="font-mono text-[11px] text-on-surface-variant">Darwinbox Staging v2.4</span>
+                </div>
+
+                <!-- Dark / Light Theme Toggle Button -->
+                <button 
+                    id="theme-toggle-btn"
+                    onclick="toggleTheme()"
+                    type="button"
+                    title="Toggle Light / Dark Mode"
+                    class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 flex items-center gap-1.5 transition cursor-pointer shadow-sm"
+                    aria-label="Toggle Theme">
+                    <span id="theme-toggle-icon" class="material-symbols-outlined text-[16px] text-indigo-600">dark_mode</span>
+                    <span id="theme-toggle-text" class="hidden sm:inline text-[11px] font-medium">Dark</span>
+                </button>
 
                 <!-- Clear DB Action Button -->
                 <button 
                     hx-post="/api/db/reset"
-                    hx-confirm="Reset the entire migration database and start fresh?"
+                    hx-confirm="Reset the entire migration database and clear all previous runs?"
                     onclick="if (window.location.pathname !== '/') { setTimeout(() => window.location.href = '/', 200); }"
-                    class="ml-3 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-red-950/40 text-red-300 border border-red-800/40 hover:bg-red-900/50 transition cursor-pointer flex items-center gap-1"
+                    class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-error-container/60 hover:bg-error-container text-on-error-container border border-error/20 flex items-center gap-1.5 transition cursor-pointer"
                     title="Wipe database and restart fresh">
-                    <svg class="w-3 h-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    <span>Clear DB</span>
+                    <span class="material-symbols-outlined text-[15px] text-error">delete_sweep</span>
+                    <span class="hidden sm:inline">Clear DB</span>
                 </button>
-            </nav>
+            </div>
         </div>
     </header>
 
-    <!-- Main Content Area (Full screen width with comfortable padding) -->
+    <!-- Main Content Area -->
     <main class="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-gray-900 bg-gray-950 py-4 text-center text-xs text-gray-500 no-print">
-        AI Agent for Client Data Migration • Open Source Engine • Event-Sourced &amp; Audit-Ready
+    <footer class="border-t border-outline-variant/30 bg-surface-container-lowest py-3.5 px-6 text-center text-xs text-secondary no-print flex flex-col sm:flex-row items-center justify-between gap-2 transition-colors duration-200">
+        <div class="flex items-center gap-2">
+            <span class="font-headline font-bold text-on-surface">DarwinSync AI</span>
+            <span class="text-outline">|</span>
+            <span>Forward Deployed Engineer Integration Platform</span>
+        </div>
+        <div class="font-mono text-[11px] text-secondary">
+            Deterministic Rule Memory • Compensating Rollback • Idempotent Dispatch
+        </div>
     </footer>
+
+    <!-- Theme State Sync Script -->
+    <script>
+        function updateThemeUI() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const icon = document.getElementById('theme-toggle-icon');
+            const text = document.getElementById('theme-toggle-text');
+            if (icon) {
+                icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+                icon.className = isDark 
+                    ? 'material-symbols-outlined text-[16px] text-amber-400' 
+                    : 'material-symbols-outlined text-[16px] text-indigo-600';
+            }
+            if (text) {
+                text.textContent = isDark ? 'Light' : 'Dark';
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            try {
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            } catch(e) {}
+            updateThemeUI();
+        }
+
+        document.addEventListener('DOMContentLoaded', updateThemeUI);
+    </script>
 </body>
 </html>

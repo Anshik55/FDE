@@ -156,14 +156,25 @@ def test_pipeline_pause_and_resume_flow(client):
     html = resp.text
     assert "PAUSED: Human Review Required" in html
     assert 'id="human-intervention-panel"' in html
-    assert "Resume Pipeline &amp; Push to Darwinbox" in html
+    assert "Decisions Pending" in html
 
     # Extract run_id
-    match = re.search(r"/api/pipeline/resume/(run_[a-f0-9]+)", html)
+    match = re.search(r"run_[a-f0-9]+", html)
     assert match is not None
-    run_id = match.group(1)
+    run_id = match.group(0)
 
-    # Resume the pipeline
+    # First attempt to resume without resolving should be blocked
+    blocked_resp = client.post(f"/api/pipeline/resume/{run_id}")
+    assert "Cannot resume" in blocked_resp.text
+
+    # Resolve all pending escalations
+    esc_ids = re.findall(r"/api/escalations/([a-f0-9\-]+)/resolve", html)
+    assert len(esc_ids) > 0
+    for esc_id in set(esc_ids):
+        res = client.post(f"/api/escalations/{esc_id}/resolve", data={"action": "approve", "remember": False})
+        assert res.status_code == 200
+
+    # Resume the pipeline after all items resolved
     resume_resp = client.post(f"/api/pipeline/resume/{run_id}")
     assert resume_resp.status_code == 200
     resume_html = resume_resp.text

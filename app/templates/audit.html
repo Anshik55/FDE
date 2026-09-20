@@ -1,121 +1,121 @@
 {% extends "base.html" %}
 
-{% block title %}Audit Trail & Change Ledger{% endblock %}
+{% block title %}Audit Trail & Change Ledger — DarwinSync AI{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <!-- Header & Export Actions -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <div class="flex items-center gap-2 mb-1">
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 font-mono">
                     Append-Only SQLite
                 </span>
-                <span class="text-xs text-gray-500 font-mono">Run: {{ run_id }}</span>
+                <span class="text-xs text-secondary font-mono">Run: {{ run_id }}</span>
             </div>
-            <h2 class="text-2xl font-bold text-white tracking-tight">Full Event Audit Trail & Change Ledger</h2>
-            <p class="text-sm text-gray-400 mt-1">
+            <h2 class="text-2xl font-bold font-headline text-on-surface tracking-tight">Full Event Audit Trail &amp; Change Ledger</h2>
+            <p class="text-xs text-secondary mt-1">
                 Immutable record of every autonomous transformation, rule application, and human decision with before &rarr; after diffs.
             </p>
         </div>
-        <div class="flex items-center gap-3">
-            <a href="/api/audit/export.csv?run_id={{ run_id }}" download class="px-3.5 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-lg border border-gray-700 transition flex items-center gap-1.5 cursor-pointer">
-                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                Export CSV
+        <div class="flex items-center gap-2.5">
+            <a href="/api/audit/export.csv?run_id={{ run_id }}" download class="px-3.5 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-xl border border-outline-variant/30 transition flex items-center gap-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[15px] text-secondary">download</span>
+                <span>Export CSV</span>
             </a>
-            <a href="/api/audit/export.json?run_id={{ run_id }}" download class="px-3.5 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-lg border border-gray-700 transition flex items-center gap-1.5 cursor-pointer">
-                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                Export JSON
+            <a href="/api/audit/export.json?run_id={{ run_id }}" download class="px-3.5 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-xl border border-outline-variant/30 transition flex items-center gap-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[15px] text-primary">data_object</span>
+                <span>Export JSON</span>
             </a>
         </div>
     </div>
 
     <!-- Filter Bar -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 text-xs">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 text-xs shadow-sm">
         <div class="flex flex-wrap items-center gap-2">
-            <span class="text-gray-400 font-semibold uppercase tracking-wider text-[10px] mr-1">Filter Actor:</span>
-            <a href="/audit?run_id={{ run_id }}" class="px-2.5 py-1 rounded-md font-medium {% if not current_actor %}bg-blue-600 text-white{% else %}bg-gray-800 text-gray-400 hover:text-white{% endif %} transition">
+            <span class="text-secondary font-semibold uppercase tracking-wider text-[10px] mr-1">Filter Actor:</span>
+            <a href="/audit?run_id={{ run_id }}" class="px-3 py-1.5 rounded-xl font-semibold {% if not current_actor %}bg-primary text-white shadow-sm shadow-primary/20{% else %}bg-surface-container text-secondary hover:text-on-surface border border-outline-variant/30{% endif %} transition">
                 All ({{ total_events }})
             </a>
-            <a href="/audit?run_id={{ run_id }}&actor=agent" class="px-2.5 py-1 rounded-md font-medium {% if current_actor == 'agent' %}bg-blue-600 text-white{% else %}bg-gray-800 text-gray-400 hover:text-white{% endif %} transition">
+            <a href="/audit?run_id={{ run_id }}&actor=agent" class="px-3 py-1.5 rounded-xl font-semibold {% if current_actor == 'agent' %}bg-primary text-white shadow-sm shadow-primary/20{% else %}bg-surface-container text-secondary hover:text-on-surface border border-outline-variant/30{% endif %} transition">
                 Agent Alone
             </a>
-            <a href="/audit?run_id={{ run_id }}&actor=rule" class="px-2.5 py-1 rounded-md font-medium {% if current_actor == 'rule' %}bg-purple-600 text-white{% else %}bg-gray-800 text-gray-400 hover:text-white{% endif %} transition">
+            <a href="/audit?run_id={{ run_id }}&actor=rule" class="px-3 py-1.5 rounded-xl font-semibold {% if current_actor == 'rule' %}bg-primary text-white shadow-sm shadow-primary/20{% else %}bg-surface-container text-secondary hover:text-on-surface border border-outline-variant/30{% endif %} transition">
                 Learned Rules
             </a>
-            <a href="/audit?run_id={{ run_id }}&actor=human" class="px-2.5 py-1 rounded-md font-medium {% if current_actor == 'human' %}bg-amber-600 text-white{% else %}bg-gray-800 text-gray-400 hover:text-white{% endif %} transition">
+            <a href="/audit?run_id={{ run_id }}&actor=human" class="px-3 py-1.5 rounded-xl font-semibold {% if current_actor == 'human' %}bg-primary text-white shadow-sm shadow-primary/20{% else %}bg-surface-container text-secondary hover:text-on-surface border border-outline-variant/30{% endif %} transition">
                 Human Decisions
             </a>
         </div>
 
-        <div class="text-gray-400 text-xs">
-            Showing <span class="text-white font-bold">{{ events|length }}</span> events
+        <div class="text-secondary text-xs">
+            Showing <span class="text-on-surface font-bold">{{ events|length }}</span> events
         </div>
     </div>
 
     <!-- Audit Events Table -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden shadow-sm">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto max-h-[700px] custom-scroll">
             <table class="w-full text-xs text-left">
-                <thead class="text-gray-400 bg-gray-950 uppercase tracking-wider border-b border-gray-800 sticky top-0 z-10">
+                <thead class="text-secondary bg-surface-container-low uppercase tracking-wider border-b border-outline-variant/30 sticky top-0 z-10 font-mono text-[11px]">
                     <tr>
                         <th class="py-3 px-4">Time (UTC)</th>
-                        <th class="py-3 px-4">Stage</th>
+                        <th class="py-3 px-4 font-sans">Stage</th>
                         <th class="py-3 px-4">Event Type</th>
                         <th class="py-3 px-4">Actor</th>
                         <th class="py-3 px-4">Target Entity</th>
                         <th class="py-3 px-4">Transformation (Before &rarr; After)</th>
-                        <th class="py-3 px-4">Decision Rationale & Score</th>
+                        <th class="py-3 px-4 font-sans">Decision Rationale &amp; Score</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-800/60 font-mono">
+                <tbody class="divide-y divide-outline-variant/20 font-mono">
                     {% for ev in events %}
-                    <tr class="hover:bg-gray-800/30 transition">
-                        <td class="py-2.5 px-4 text-gray-500 whitespace-nowrap">{{ ev.ts[11:19] }}</td>
-                        <td class="py-2.5 px-4 font-sans font-semibold text-gray-300 uppercase text-[11px]">{{ ev.stage }}</td>
-                        <td class="py-2.5 px-4 font-bold text-white whitespace-nowrap">{{ ev.type }}</td>
+                    <tr class="hover:bg-surface-container-low/60 transition">
+                        <td class="py-2.5 px-4 text-secondary/70 whitespace-nowrap text-[11px]">{{ ev.ts[11:19] }}</td>
+                        <td class="py-2.5 px-4 font-sans font-semibold text-on-surface uppercase text-[11px]">{{ ev.stage }}</td>
+                        <td class="py-2.5 px-4 font-bold text-on-surface whitespace-nowrap">{{ ev.type }}</td>
                         <td class="py-2.5 px-4 whitespace-nowrap">
                             {% if ev.actor == 'agent' %}
-                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">AGENT</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">AGENT</span>
                             {% elif ev.actor == 'rule' %}
-                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-500/20 text-purple-400 border border-purple-500/30">RULE</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-500/10 text-purple-700 border border-purple-500/20">RULE</span>
                             {% elif ev.actor == 'human' %}
-                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">HUMAN</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/10 text-amber-800 border border-amber-500/30">HUMAN</span>
                             {% else %}
-                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-700/50 text-gray-400 border border-gray-600/30">SYS</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-surface-container text-secondary border border-outline-variant/40">SYS</span>
                             {% endif %}
                         </td>
-                        <td class="py-2.5 px-4 text-gray-300">
+                        <td class="py-2.5 px-4 text-on-surface">
                             {% if ev.entity_id %}
-                            <span class="text-blue-300 font-bold">{{ ev.entity_id }}</span>
+                            <span class="text-primary font-bold">{{ ev.entity_id }}</span>
                             {% if ev.field %}
-                            <span class="text-gray-500 font-sans text-[11px]"> &bull; {{ ev.field }}</span>
+                            <span class="text-secondary font-sans text-[11px]"> &bull; {{ ev.field }}</span>
                             {% endif %}
                             {% else %}
-                            <span class="text-gray-600">-</span>
+                            <span class="text-secondary/50">-</span>
                             {% endif %}
                         </td>
                         <td class="py-2.5 px-4">
                             {% if ev.before or ev.after %}
                             <div class="flex items-center gap-1.5 text-[11px]">
-                                <span class="px-1.5 py-0.5 rounded bg-gray-950 text-red-400 line-through max-w-[140px] truncate" title="{{ ev.before }}">{{ ev.before or 'null' }}</span>
-                                <span class="text-gray-500">&rarr;</span>
-                                <span class="px-1.5 py-0.5 rounded bg-gray-950 text-emerald-400 font-bold max-w-[140px] truncate" title="{{ ev.after }}">{{ ev.after }}</span>
+                                <span class="px-1.5 py-0.5 rounded bg-error/10 text-error line-through max-w-[140px] truncate" title="{{ ev.before }}">{{ ev.before or 'null' }}</span>
+                                <span class="text-secondary">&rarr;</span>
+                                <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 font-bold max-w-[140px] truncate" title="{{ ev.after }}">{{ ev.after }}</span>
                             </div>
                             {% else %}
-                            <span class="text-gray-600">-</span>
+                            <span class="text-secondary/50">-</span>
                             {% endif %}
                         </td>
-                        <td class="py-2.5 px-4 font-sans text-gray-300 text-[11px]">
+                        <td class="py-2.5 px-4 font-sans text-on-surface/80 text-[11px]">
                             <div>{{ ev.reason or '-' }}</div>
                             {% if ev.score %}
-                            <div class="text-emerald-400 font-mono font-semibold text-[10px] mt-0.5">Calculated score: {{ "%.2f"|format(ev.score) }}</div>
+                            <div class="text-emerald-700 font-mono font-semibold text-[10px] mt-0.5">Calculated score: {{ "%.2f"|format(ev.score) }}</div>
                             {% endif %}
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" class="py-8 text-center text-gray-500 font-sans">
+                        <td colspan="7" class="py-8 text-center text-secondary font-sans">
                             No events found matching the current filter.
                         </td>
                     </tr>
