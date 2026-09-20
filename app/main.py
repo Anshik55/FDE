@@ -736,24 +736,34 @@ async def trigger_run(request: Request):
 
 
 @app.post("/api/upload-and-run", response_class=HTMLResponse)
-async def upload_and_run(files: List[UploadFile] = File(...)):
+async def upload_and_run(request: Request):
     """Accept user-uploaded CSV / Excel files and run the migration pipeline on them."""
-    if not files:
-        raise HTTPException(status_code=400, detail="No files uploaded")
-
+    form = await request.form()
+    raw_files = form.getlist("files")
     saved_paths = []
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    for f in files:
-        if not f.filename:
-            continue
-        clean_name = Path(f.filename).name
-        dest = UPLOAD_DIR / f"{ts}_{clean_name}"
-        content = await f.read()
-        dest.write_bytes(content)
-        saved_paths.append(dest)
+    for f in raw_files:
+        filename = getattr(f, "filename", None)
+        if filename and filename.strip():
+            clean_name = Path(filename).name
+            dest = UPLOAD_DIR / f"{ts}_{clean_name}"
+            content = await f.read()
+            if content:
+                dest.write_bytes(content)
+                saved_paths.append(dest)
 
     if not saved_paths:
-        raise HTTPException(status_code=400, detail="No valid files provided")
+        conn = get_db_connection()
+        latest_run_id = get_latest_run_id(conn) or "No Active Run"
+        stats = get_dashboard_stats(conn, latest_run_id if latest_run_id != "No Active Run" else None)
+        events = tail_events(conn, latest_run_id, last_id=0, limit=50) if latest_run_id != "No Active Run" else []
+        return HTMLResponse(render_run_container_html(
+            latest_run_id,
+            stats,
+            events,
+            banner_msg="⚠️ No files selected. Please select at least one .csv or .xlsx file before uploading, or click 'Or Run Sample Fixtures'.",
+            is_paused=False,
+        ))
 
     result = await asyncio.to_thread(run_pipeline, file_paths=saved_paths, pause_on_escalation=True)
     run_id = result["run_id"]

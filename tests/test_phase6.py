@@ -140,6 +140,14 @@ def test_upload_and_run_endpoint(tmp_path, client):
     assert resp.status_code == 200
     assert "Successfully ingested and processed 1 uploaded file(s)" in resp.text
 
+    # Empty upload should gracefully return 200 with warning banner, not 400 crash
+    empty_resp = client.post(
+        "/api/upload-and-run",
+        files={"files": ("", b"", "text/csv")},
+    )
+    assert empty_resp.status_code == 200
+    assert "No files selected" in empty_resp.text
+
 
 def test_pipeline_pause_and_resume_flow(client):
     """Uploading a file with ambiguities pauses the pipeline for human review and allows resuming."""

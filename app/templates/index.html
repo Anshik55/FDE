@@ -18,11 +18,13 @@
 
         <!-- File Upload Form -->
         <form 
+            id="upload-form"
             hx-post="/api/upload-and-run"
             hx-encoding="multipart/form-data"
             hx-target="#run-container"
             hx-swap="outerHTML"
             hx-indicator="#upload-spinner"
+            onsubmit="const fi = document.getElementById('file-input'); if (!fi || !fi.files || fi.files.length === 0) { event.preventDefault(); const sl = document.getElementById('selected-files-list'); if(sl) { sl.textContent = '⚠️ Please select at least one .csv or .xlsx file before uploading.'; sl.className = 'mt-1.5 text-[11px] text-error font-bold font-mono'; } return false; } if (typeof updatePipelineStage === 'function') updatePipelineStage('ingest', false); return true;"
             class="space-y-4 pt-4 border-t border-outline-variant/20">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                 <div class="md:col-span-2">
@@ -45,9 +47,10 @@
 
                 <div class="flex flex-col gap-2 pt-4 md:pt-0">
                     <button 
+                        id="upload-btn"
                         type="submit" 
-                        onclick="if(typeof updatePipelineStage==='function') updatePipelineStage('ingest', false);"
-                        class="w-full px-4 py-2.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-xl shadow-md shadow-primary/20 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer">
+                        disabled
+                        class="w-full px-4 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-md shadow-primary/20 flex items-center justify-center gap-2 transition active:scale-95 opacity-50 cursor-not-allowed">
                         <span class="material-symbols-outlined text-[16px]">upload_file</span>
                         <span>Upload &amp; Run Migration</span>
                     </button>
@@ -79,15 +82,24 @@
     <script>
         function updateFileList(input) {
             const list = document.getElementById('selected-files-list');
+            const uploadBtn = document.getElementById('upload-btn');
             if (input.files && input.files.length > 0) {
                 const names = Array.from(input.files).map(f => `${f.name} (${(f.size/1024).toFixed(1)} KB)`).join(', ');
                 list.textContent = `Selected (${input.files.length}): ${names}`;
-                list.classList.remove('italic', 'text-secondary');
-                list.classList.add('text-emerald-700', 'font-semibold');
+                list.className = 'mt-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold font-mono';
+                if (uploadBtn) {
+                    uploadBtn.disabled = false;
+                    uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    uploadBtn.classList.add('cursor-pointer', 'hover:bg-primary/90');
+                }
             } else {
                 list.textContent = 'No custom files selected yet.';
-                list.classList.add('italic', 'text-secondary');
-                list.classList.remove('text-emerald-700', 'font-semibold');
+                list.className = 'mt-1.5 text-[11px] text-secondary font-mono italic';
+                if (uploadBtn) {
+                    uploadBtn.disabled = true;
+                    uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    uploadBtn.classList.remove('cursor-pointer', 'hover:bg-primary/90');
+                }
             }
         }
     </script>
