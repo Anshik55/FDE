@@ -175,9 +175,14 @@ def render_stages_html(
         progress_label = "0% (Ready)"
         status_badge = '<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-surface-container text-secondary border border-outline-variant/30">Ready</span>'
     elif is_paused:
-        progress_pct = 80
-        progress_label = f"Stage 5 (Paused for Review • {pending_count} pending)"
-        status_badge = f'<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 animate-pulse"><span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping mr-1"></span> ⏸️ PAUSED: Human Review Required ({pending_count} items)</span>'
+        if pending_count > 0:
+            progress_pct = 80
+            progress_label = f"Stage 5 (Paused for Review • {pending_count} pending)"
+            status_badge = f'<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 animate-pulse"><span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping mr-1"></span> ⏸️ PAUSED: Human Review Required ({pending_count} items)</span>'
+        else:
+            progress_pct = 90
+            progress_label = "Stage 5 Done • Ready to Push"
+            status_badge = '<span id="pipeline-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 animate-pulse"><span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping mr-1"></span> ▶ Ready to Resume &amp; Push</span>'
     elif is_running:
         progress_pct = int((active_step / 6) * 100)
         progress_label = f"Stage {active_step} of 6 ({progress_pct}%)"
@@ -204,17 +209,31 @@ def render_stages_html(
                 icon_color = "text-emerald-500"
                 subtitle_color = "text-emerald-600 dark:text-emerald-400 font-semibold"
             elif num == 5:
-                card_class = "border-2 border-amber-500 bg-amber-500/[0.08] text-on-surface ring-2 ring-amber-500/20 shadow-md transform scale-[1.01]"
-                badge_class = "bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 font-bold animate-pulse"
-                badge_html = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping mr-1"></span> ⏸️ Paused'
-                icon_color = "text-amber-500"
-                subtitle_color = "text-amber-600 dark:text-amber-400 font-semibold"
+                if pending_count > 0:
+                    card_class = "border-2 border-amber-500 bg-amber-500/[0.08] text-on-surface ring-2 ring-amber-500/20 shadow-md transform scale-[1.01]"
+                    badge_class = "bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 font-bold animate-pulse"
+                    badge_html = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping mr-1"></span> ⏸️ Paused'
+                    icon_color = "text-amber-500"
+                    subtitle_color = "text-amber-600 dark:text-amber-400 font-semibold"
+                else:
+                    card_class = "border-emerald-500/30 bg-emerald-500/[0.07] text-on-surface shadow-sm"
+                    badge_class = "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold"
+                    badge_html = "✓ Done"
+                    icon_color = "text-emerald-500"
+                    subtitle_color = "text-emerald-600 dark:text-emerald-400 font-semibold"
             else:
-                card_class = "border-outline-variant/30 bg-surface-container-low/50 text-secondary opacity-65"
-                badge_class = "bg-surface-container text-secondary border border-outline-variant/30"
-                badge_html = "Waiting for Resume"
-                icon_color = "text-secondary/70"
-                subtitle_color = "text-secondary"
+                if pending_count == 0:
+                    card_class = "border-2 border-primary bg-primary/[0.08] text-on-surface ring-2 ring-primary/20 shadow-md transform scale-[1.01]"
+                    badge_class = "bg-primary/20 text-primary border border-primary/30 font-bold animate-pulse"
+                    badge_html = '<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping mr-1"></span> Ready to Push'
+                    icon_color = "text-primary"
+                    subtitle_color = "text-primary font-semibold"
+                else:
+                    card_class = "border-outline-variant/30 bg-surface-container-low/50 text-secondary opacity-65"
+                    badge_class = "bg-surface-container text-secondary border border-outline-variant/30"
+                    badge_html = "Waiting for Resume"
+                    icon_color = "text-secondary/70"
+                    subtitle_color = "text-secondary"
         elif is_running:
             if num < active_step:
                 card_class = "border-emerald-500/30 bg-emerald-500/[0.07] text-on-surface shadow-sm"
@@ -292,7 +311,40 @@ def render_stages_html(
 def render_inline_escalations_html(run_id: str, escalations: list) -> str:
     """Renders the prominent in-page Human Review Panel when the pipeline is paused."""
     if not escalations:
-        return ""
+        if not run_id or run_id == "No Active Run":
+            return ""
+        return f"""
+        <!-- Human Intervention Panel (All Resolved - Ready to Push) -->
+        <div class="bg-emerald-500/10 border-2 border-emerald-500/40 rounded-2xl p-5 shadow-sm space-y-3" id="human-intervention-panel">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-3 w-3 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-emerald-900 dark:text-emerald-300 font-headline tracking-wide uppercase">
+                            All Human Decisions Resolved — Ready to Push
+                        </h3>
+                        <p class="text-xs text-emerald-800/80 dark:text-emerald-400/80 mt-0.5">
+                            All escalations have been approved and saved to resolution memory. Click Resume to push verified records to Darwinbox API.
+                        </p>
+                    </div>
+                </div>
+
+                <button 
+                    id="resume-pipeline-btn"
+                    type="button"
+                    hx-post="/api/pipeline/resume/{run_id}"
+                    hx-target="#run-container"
+                    hx-swap="outerHTML"
+                    class="queue-resume-btn px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 flex items-center gap-2 transition active:scale-95 cursor-pointer whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                    <span>Resume Pipeline &amp; Push to Darwinbox</span>
+                </button>
+            </div>
+        </div>
+        """
 
     cards_html = []
     for esc in escalations:
@@ -465,7 +517,7 @@ def render_inline_escalations_html(run_id: str, escalations: list) -> str:
 @app.get("/", response_class=HTMLResponse)
 async def index_view(request: Request):
     conn = get_db_connection()
-    run_id = get_latest_run_id(conn)
+    run_id = request.query_params.get("run_id") or get_latest_run_id(conn)
     stats = get_dashboard_stats(conn, run_id)
     events = tail_events(conn, run_id, last_id=0, limit=50) if run_id else []
 
@@ -476,7 +528,7 @@ async def index_view(request: Request):
             run_status = row["status"]
 
     pending_escs = get_pending_escalations(conn, run_id) if run_id else []
-    is_paused = (run_status == "paused") or (len(pending_escs) > 0 and run_id != "No Active Run")
+    is_paused = (run_status == "paused")
 
     stages_html = render_stages_html(
         run_id or "No Active Run",
@@ -722,8 +774,10 @@ async def resume_pipeline_endpoint(run_id: str, request: Request):
         ))
 
     result = await asyncio.to_thread(resume_pipeline, run_id=run_id)
-    stats = get_dashboard_stats(conn, run_id)
-    events = tail_events(conn, run_id, last_id=0, limit=50)
+    fresh_conn = get_db_connection()
+    stats = get_dashboard_stats(fresh_conn, run_id)
+    events = tail_events(fresh_conn, run_id, last_id=0, limit=50)
+    pushed_cnt = stats.get('pushed_records', 0)
 
     if is_from_queue:
         return Response(status_code=200, headers={"HX-Redirect": f"/?resumed=1&run_id={run_id}"})
@@ -732,7 +786,7 @@ async def resume_pipeline_endpoint(run_id: str, request: Request):
         run_id,
         stats,
         events,
-        banner_msg=f"Pipeline resumed! Successfully completed push to Darwinbox API ({result.get('valid_records', 0)} records pushed).",
+        banner_msg=f"Pipeline resumed! Successfully completed push to Darwinbox API ({pushed_cnt} records pushed).",
         is_paused=False,
     ))
 
@@ -796,7 +850,7 @@ async def stream_events(run_id: str, from_id: Optional[int] = None):
 async def queue_view(request: Request):
     """Review queue showing open escalation cards."""
     conn = get_db_connection()
-    run_id = get_latest_run_id(conn)
+    run_id = request.query_params.get("run_id") or get_latest_run_id(conn)
     run_status = None
     if run_id:
         row = conn.execute("SELECT status FROM runs WHERE id = ?", (run_id,)).fetchone()
@@ -804,9 +858,14 @@ async def queue_view(request: Request):
             run_status = row["status"]
     is_paused = (run_status == "paused")
 
-    escalations_raw = conn.execute(
-        "SELECT * FROM escalations ORDER BY status ASC, created_at DESC"
-    ).fetchall()
+    if run_id:
+        escalations_raw = conn.execute(
+            "SELECT * FROM escalations WHERE run_id = ? ORDER BY status ASC, created_at DESC", (run_id,)
+        ).fetchall()
+    else:
+        escalations_raw = conn.execute(
+            "SELECT * FROM escalations ORDER BY status ASC, created_at DESC"
+        ).fetchall()
 
     escalations = []
     for row in escalations_raw:
