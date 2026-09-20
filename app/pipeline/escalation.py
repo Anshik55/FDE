@@ -142,11 +142,13 @@ def resolve_escalation(
     # Apply resolved record changes into canonical_records
     context = json.loads(row["context_json"]) if row["context_json"] else {}
     if action in ("approve", "correct"):
-        record_data = context.get("record_data")
+        record_data = context.get("record_data") or context.get("payload") or {}
         if record_data:
+            field = context.get("field")
+            errors = context.get("errors", [])
+            err_str = str(context.get("error", "")).lower()
+
             if action == "correct" and value:
-                field = context.get("field")
-                errors = context.get("errors", [])
                 if field:
                     record_data[field] = value
                 elif any("email" in str(e).lower() for e in errors):
@@ -155,13 +157,28 @@ def resolve_escalation(
                     record_data["employment_status"] = value
                 elif any("salary" in str(e).lower() for e in errors):
                     record_data["salary"] = value
+                elif "employee_id" in err_str:
+                    record_data["employee_id"] = value
             elif action == "approve":
                 # If approval has proposal canonical value, apply it
                 proposal = json.loads(row["proposal_json"]) if row["proposal_json"] else {}
-                if "canonical_value" in proposal and context.get("field"):
-                    record_data[context["field"]] = proposal["canonical_value"]
+                if "canonical_value" in proposal and proposal["canonical_value"]:
+                    canon_v = proposal["canonical_value"]
+                    if field:
+                        record_data[field] = canon_v
+                    elif "employee_id" in err_str:
+                        record_data["employee_id"] = canon_v
+                    elif "department" in str(context.get("title", "")).lower():
+                        record_data["department"] = canon_v
 
             emp_id = str(record_data.get("employee_id") or context.get("entity_key") or "").replace("id:", "").replace("email:", "")
+            if not emp_id and row.get("affected_ids_json"):
+                aff = json.loads(row["affected_ids_json"] or "[]")
+                if aff:
+                    emp_id = str(aff[0]).replace("id:", "").replace("email:", "")
+            if emp_id and not record_data.get("employee_id"):
+                record_data["employee_id"] = emp_id
+
             if emp_id:
                 cursor.execute(
                     """
@@ -171,6 +188,14 @@ def resolve_escalation(
                     """,
                     (f"can_{emp_id}", row["run_id"], emp_id, json.dumps(record_data), json.dumps({"source": "human_resolution"})),
                 )
+                affected_ids = json.loads(row["affected_ids_json"] or "[]")
+                for a_id in affected_ids:
+                    old_key = str(a_id).replace("id:", "").replace("email:", "")
+                    if old_key != emp_id:
+                        cursor.execute(
+                            "DELETE FROM canonical_records WHERE run_id = ? AND canonical_key = ?",
+                            (row["run_id"], old_key),
+                        )
                 conn.commit()
     elif action == "reject":
         affected_ids = json.loads(row["affected_ids_json"] or "[]")

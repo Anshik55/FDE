@@ -387,7 +387,38 @@ def run_pipeline(
                 reason=f"Push stage failed: {ex}",
             )
 
-    # 9. Complete Run
+    # 9. Check if any escalations remain pending (e.g. from push rejections)
+    pending_esc_count = db_conn.execute(
+        "SELECT COUNT(*) as cnt FROM escalations WHERE run_id = ? AND status = 'pending'", (run_id,)
+    ).fetchone()["cnt"]
+
+    if pause_on_escalation and pending_esc_count > 0:
+        with db_conn:
+            db_conn.execute(
+                "UPDATE runs SET status = 'paused' WHERE id = ?",
+                (run_id,),
+            )
+        emit(
+            conn=db_conn,
+            run_id=run_id,
+            stage="push",
+            event_type="PIPELINE_PAUSED",
+            actor=Actor.AGENT,
+            reason=f"Pipeline paused: {pending_esc_count} item(s) require human review (Target API rejected {push_results.get('failed_count', 0)} records)",
+            meta={"pending_escalations": pending_esc_count, "push": push_results},
+        )
+        return {
+            "run_id": run_id,
+            "status": "paused",
+            "total_source_rows": total_source_rows,
+            "canonical_records": len(canonical_records),
+            "valid_records": len(valid_records),
+            "records_processed": len(valid_records),
+            "escalations_opened": pending_esc_count,
+            "push_results": push_results,
+        }
+
+    # 10. Complete Run (only if 0 pending escalations)
     finished_at = datetime.now(timezone.utc).isoformat()
     with db_conn:
         db_conn.execute(
@@ -477,6 +508,34 @@ def resume_pipeline(
                 actor=Actor.AGENT,
                 reason=f"Push stage failed on resume: {ex}",
             )
+
+    # Check if any escalations remain pending (e.g. from 4xx target push rejections)
+    pending_esc_count = db_conn.execute(
+        "SELECT COUNT(*) as cnt FROM escalations WHERE run_id = ? AND status = 'pending'", (run_id,)
+    ).fetchone()["cnt"]
+
+    if pending_esc_count > 0:
+        with db_conn:
+            db_conn.execute(
+                "UPDATE runs SET status = 'paused' WHERE id = ?",
+                (run_id,),
+            )
+        emit(
+            conn=db_conn,
+            run_id=run_id,
+            stage="push",
+            event_type="PIPELINE_PAUSED",
+            actor=Actor.AGENT,
+            reason=f"Pipeline paused: {pending_esc_count} item(s) rejected by Target API require human review before completion",
+            meta={"pending_escalations": pending_esc_count, "push": push_results},
+        )
+        return {
+            "run_id": run_id,
+            "status": "paused",
+            "valid_records": len(valid_records),
+            "escalations_opened": pending_esc_count,
+            "push_results": push_results,
+        }
 
     finished_at = datetime.now(timezone.utc).isoformat()
     with db_conn:

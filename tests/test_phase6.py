@@ -205,3 +205,86 @@ def test_records_view_and_exports(client):
     assert "run_id" in data
 
 
+def test_push_rejection_pauses_pipeline_and_repush_on_resolve(client):
+    """When a 4xx target API rejection occurs, pipeline must pause at Stage 6, allowing correction and re-push."""
+    import json
+    from app.db import get_db_connection
+    from app.pipeline.orchestrator import resume_pipeline
+
+    from datetime import datetime, timezone
+    client.post("/api/db/reset")
+    conn = get_db_connection()
+    run_id = "run_push_test"
+    now_iso = datetime.now(timezone.utc).isoformat()
+    with conn:
+        conn.execute("INSERT INTO runs (id, client_id, status, started_at) VALUES (?, 'acme_corp', 'paused', ?)", (run_id, now_iso))
+        emp1 = {
+            "employee_id": "E101",
+            "first_name": "Test",
+            "last_name": "One",
+            "email": "test.one@example.com",
+            "hire_date": "2023-01-01",
+            "employment_status": "Active",
+            "department": "Engineering",
+        }
+        emp2 = {
+            "employee_id": "E102",
+            "first_name": "Test",
+            "last_name": "Two",
+            "email": "test.two@example.com",
+            "hire_date": "2023-01-01",
+            "employment_status": "Active",
+            "department": "InvalidDept",
+        }
+        conn.execute(
+            "INSERT INTO canonical_records (id, run_id, canonical_key, data_json, provenance_json, status) VALUES (?, ?, ?, ?, '{}', 'ready')",
+            ("can_E101", run_id, "E101", json.dumps(emp1)),
+        )
+        conn.execute(
+            "INSERT INTO canonical_records (id, run_id, canonical_key, data_json, provenance_json, status) VALUES (?, ?, ?, ?, '{}', 'ready')",
+            ("can_E102", run_id, "E102", json.dumps(emp2)),
+        )
+
+    # Configure Darwinbox Stub to reject E102 with 422
+    client.post("/stub/admin/failure-config", json={"fail_422_ids": ["E102"]})
+
+    # Resume pipeline -> E101 succeeds, E102 fails with 422
+    result = resume_pipeline(run_id=run_id, conn=conn, push_to_target=True, target_api_url="http://testserver/stub")
+    assert result["status"] == "paused"
+    assert result["escalations_opened"] == 1
+
+    # Verify run remains paused in DB
+    row = conn.execute("SELECT status FROM runs WHERE id = ?", (run_id,)).fetchone()
+    assert row["status"] == "paused"
+
+    # Find the PUSH_REJECTED_4XX escalation
+    esc = conn.execute("SELECT * FROM escalations WHERE run_id = ? AND type = 'PUSH_REJECTED_4XX'", (run_id,)).fetchone()
+    assert esc is not None
+    esc_id = esc["id"]
+
+    # Clear failure config so next push succeeds
+    client.post("/stub/admin/failure-config", json={"fail_422_ids": []})
+
+    # Resolve escalation with correction
+    resolve_resp = client.post(
+        f"/api/escalations/{esc_id}/resolve",
+        data={"action": "correct", "correct_value": "Engineering", "remember": False},
+    )
+    assert resolve_resp.status_code == 200
+
+    # Verify canonical record is reset to ready
+    fresh_conn = get_db_connection()
+    can_row = fresh_conn.execute("SELECT status FROM canonical_records WHERE run_id = ? AND canonical_key = 'E102'", (run_id,)).fetchone()
+    assert can_row["status"] == "ready"
+
+    # Now resume pipeline via endpoint
+    resume_resp = client.post(f"/api/pipeline/resume/{run_id}")
+    assert resume_resp.status_code == 200
+    assert "All 6 Stages Completed" in resume_resp.text or "Pipeline resumed" in resume_resp.text
+
+    # Verify run is now completed
+    run_final = conn.execute("SELECT status FROM runs WHERE id = ?", (run_id,)).fetchone()
+    assert run_final["status"] == "completed"
+
+
+

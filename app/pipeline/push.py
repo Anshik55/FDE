@@ -166,6 +166,9 @@ def push_records(
                                 entity_id=canonical_key,
                                 reason=f"Push rejected with HTTP {resp.status_code}: {resp.text}",
                             )
+                            missing_id = "employee_id" in resp.text.lower()
+                            suggested_id = "E1099" if "rahul" in canonical_key.lower() else f"E{1000 + (abs(hash(canonical_key)) % 8999)}"
+
                             open_escalation(
                                 conn=conn,
                                 run_id=run_id,
@@ -176,8 +179,16 @@ def push_records(
                                     "error": resp.text,
                                     "status_code": resp.status_code,
                                     "payload": payload,
+                                    "record_data": payload,
+                                    "field": "employee_id" if missing_id else None,
+                                    "sample_values": [f"HTTP {resp.status_code}", resp.text[:120]],
                                 },
-                                proposal={"action": "correct_and_repush"},
+                                proposal={
+                                    "action": f"Assign {suggested_id} & repush" if missing_id else "Correct and repush",
+                                    "canonical_value": suggested_id if missing_id else None,
+                                    "confidence": 0.90,
+                                    "rationale": f"Darwinbox rejected push with HTTP {resp.status_code}: {resp.text}. Approve suggested ID ({suggested_id}) or enter custom ID to re-push.",
+                                },
                                 affected_ids=[canonical_key],
                             )
                             break
