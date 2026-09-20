@@ -1,0 +1,25 @@
+client_id: acme_corp
+llm:
+  model: "qwen2.5:7b-instruct"
+  temperature: 0
+  mode: replay    # live | replay
+  base_url: "http://localhost:11434"
+mapping:
+  auto_accept_score: 0.75
+  min_margin: 0.20
+fuzzy_dup:
+  name_similarity: 90
+  require_same_dob: true
+circuit_breaker:
+  max_escalation_groups: 20
+  max_escalated_row_ratio: 0.30
+push:
+  batch_size: 10
+  max_retries: 3
+  backoff_base_s: 0.5
+  outage_consecutive_failures: 3
+source_precedence:
+  - hris_export
+  - legacy_crm
+  - payroll_export
+default_phone_region: IN

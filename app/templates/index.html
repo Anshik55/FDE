@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Top Ingestion & Action Card -->
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-sm space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                    <span>Source Data Ingestion</span>
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 font-normal">Multi-Source</span>
+                </h2>
+                <p class="text-xs text-gray-400 mt-1">
+                    Upload new legacy HRIS, CRM, or Payroll files (CSV / Excel), or test with pre-planted sample fixtures.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button 
+                    hx-post="/api/db/reset"
+                    hx-confirm="Are you sure you want to reset the database? This clears all past runs, events, and escalations."
+                    hx-target="#run-container"
+                    hx-swap="outerHTML"
+                    class="px-3.5 py-2 bg-red-950/40 hover:bg-red-900/50 text-red-300 text-xs font-semibold rounded-lg border border-red-800/40 transition flex items-center gap-1.5 cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Clear Database
+                </button>
+                <a href="/queue" class="px-3.5 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-lg border border-gray-700 transition flex items-center gap-1">
+                    Review Queue &rarr;
+                </a>
+            </div>
+        </div>
+
+        <!-- File Upload Form -->
+        <form 
+            hx-post="/api/upload-and-run"
+            hx-encoding="multipart/form-data"
+            hx-target="#run-container"
+            hx-swap="outerHTML"
+            hx-indicator="#upload-spinner"
+            class="space-y-4 pt-4 border-t border-gray-800">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">
+                        Select Client Files (.csv, .xlsx, .xls)
+                    </label>
+                    <input 
+                        type="file" 
+                        name="files" 
+                        multiple 
+                        accept=".csv,.xlsx,.xls"
+                        id="file-input"
+                        onchange="updateFileList(this)"
+                        class="block w-full text-xs text-gray-400 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 file:cursor-pointer cursor-pointer bg-gray-950 border border-gray-800 rounded-lg p-1.5 focus:outline-none focus:border-blue-500">
+                    <div id="selected-files-list" class="mt-1.5 text-[11px] text-gray-400 font-mono italic">
+                        No custom files selected yet.
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 pt-4 md:pt-0">
+                    <button 
+                        type="submit" 
+                        onclick="if(typeof updatePipelineStage==='function') updatePipelineStage('ingest', false);"
+                        class="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span>Upload &amp; Run Migration</span>
+                    </button>
+                    <button 
+                        type="button"
+                        hx-post="/api/run"
+                        hx-target="#run-container"
+                        hx-swap="outerHTML"
+                        hx-indicator="#upload-spinner"
+                        onclick="if(typeof updatePipelineStage==='function') updatePipelineStage('ingest', false);"
+                        class="w-full px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium rounded-lg border border-gray-700 flex items-center justify-center gap-1.5 transition cursor-pointer">
+                        <span>⚡ Or Run Sample Fixtures</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading Spinner Indicator -->
+            <div id="upload-spinner" class="htmx-indicator flex items-center gap-2 text-xs text-blue-400 font-medium py-1">
+                <svg class="animate-spin h-4 w-4 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Processing migration pipeline (ingesting, mapping, deduplicating, validating)...</span>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function updateFileList(input) {
+            const list = document.getElementById('selected-files-list');
+            if (input.files && input.files.length > 0) {
+                const names = Array.from(input.files).map(f => `${f.name} (${(f.size/1024).toFixed(1)} KB)`).join(', ');
+                list.textContent = `Selected (${input.files.length}): ${names}`;
+                list.classList.remove('italic', 'text-gray-400');
+                list.classList.add('text-emerald-400');
+            } else {
+                list.textContent = 'No custom files selected yet.';
+                list.classList.add('italic', 'text-gray-400');
+                list.classList.remove('text-emerald-400');
+            }
+        }
+    </script>
+
+    <div id="run-container" class="space-y-6">
+        <!-- Live Metrics Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Source Records In</div>
+                <div class="text-2xl font-bold text-white mt-1" id="stat-total-rows">{{ stats.total_source_rows }}</div>
+                <div class="text-xs text-gray-500 mt-1">Across 3 source files</div>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Autonomy Score</div>
+                <div class="text-2xl font-bold text-emerald-400 mt-1" id="stat-autonomy">{{ stats.autonomy_score }}%</div>
+                <div class="text-xs text-gray-500 mt-1">Resolved without human intervention</div>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Pending Escalations</div>
+                <div class="text-2xl font-bold text-amber-400 mt-1" id="stat-escalations">{{ stats.pending_escalations }}</div>
+                <div class="text-xs text-gray-500 mt-1">Requires human review</div>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Pushed to Darwinbox</div>
+                <div class="text-2xl font-bold text-blue-400 mt-1" id="stat-pushed">{{ stats.pushed_records }}</div>
+                <div class="text-xs text-gray-500 mt-1">Target API verified</div>
+            </div>
+        </div>
+
+        <!-- Dynamic Stages Stepper -->
+        {{ stages_html | safe }}
+
+        <!-- Inline Escalations Panel if Paused -->
+        {{ inline_escalations_html | safe }}
+
+        <!-- Live Event Stream Feed -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-gray-800 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <h3 class="text-sm font-semibold text-white">Append-Only Event Stream</h3>
+                </div>
+                <span class="text-xs text-gray-500 font-mono">Run: {{ run_id }}</span>
+            </div>
+
+            <!-- HTMX SSE Event Stream Container -->
+            <div 
+                hx-ext="sse" 
+                {% if run_id and run_id != 'No Active Run' %}sse-connect="/api/events/stream/{{ run_id }}"{% endif %}
+                sse-swap="event"
+                class="space-y-2.5 max-h-[480px] overflow-y-auto custom-scroll pr-1 font-mono text-xs"
+                id="events-feed">
+                {% for ev in events %}
+                <div class="p-2.5 rounded-lg bg-gray-950/80 border border-gray-800/80 flex items-start gap-3 hover:border-gray-700 transition" data-stage="{{ ev.stage }}" data-type="{{ ev.type }}">
+                    <span class="text-gray-500 whitespace-nowrap">{{ ev.ts[11:19] }}</span>
+                    
+                    {% if ev.actor == 'agent' %}
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">AGENT</span>
+                    {% elif ev.actor == 'human' %}
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">HUMAN</span>
+                    {% elif ev.actor == 'rule' %}
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">RULE</span>
+                    {% else %}
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-gray-600/30 text-gray-300">SYS</span>
+                    {% endif %}
+
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-800 text-gray-300">{{ ev.type }}</span>
+                    <span class="text-gray-300 flex-1 break-words font-sans">{{ ev.reason or ev.type }}</span>
+                    
+                    {% if ev.score %}
+                    <span class="text-emerald-400 font-semibold whitespace-nowrap">score: {{ "%.2f"|format(ev.score) }}</span>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center py-10 text-gray-500 font-sans text-sm">
+                    No events recorded yet. Click "Start New Migration Run" to begin.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const STAGE_MAP = {
+        'init': 1,
+        'ingest': 1,
+        'profile': 2,
+        'mapping': 3,
+        'map_schema': 3,
+        'normalize': 4,
+        'reconcile': 4,
+        'validate': 5,
+        'escalation': 5,
+        'rules': 5,
+        'push': 6,
+        'complete': 7
+    };
+
+    function updatePipelineStage(stageKey, isCompleted = false, isPaused = false) {
+        const stageNum = isCompleted ? 7 : (STAGE_MAP[stageKey] || 1);
+        const totalStages = 6;
+        
+        const bar = document.getElementById('pipeline-progress-bar');
+        const progressText = document.getElementById('pipeline-progress-text');
+        const statusBadge = document.getElementById('pipeline-status-badge');
+
+        if (isPaused) {
+            if (bar) bar.style.width = '80%';
+            if (progressText) progressText.textContent = '80% (Paused for Review)';
+            if (statusBadge) {
+                statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse';
+                statusBadge.innerHTML = '<span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping mr-1"></span> ⏸️ PAUSED: Human Review Required';
+            }
+            for (let i = 1; i <= totalStages; i++) {
+                const card = document.getElementById(`stage-card-${i}`);
+                const badge = document.getElementById(`stage-badge-${i}`);
+                if (!card || !badge) continue;
+                if (i < 5) {
+                    card.className = 'stage-step-card p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-950/25 text-emerald-200 transition-all duration-300 shadow-sm';
+                    badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                    badge.innerHTML = '✓ Done';
+                } else if (i === 5) {
+                    card.className = 'stage-step-card p-3.5 rounded-xl border-2 border-amber-500 bg-amber-950/40 text-amber-100 ring-2 ring-amber-500/30 shadow-lg shadow-amber-500/20 transition-all duration-300 transform scale-[1.02]';
+                    badge.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/30 text-amber-200 border border-amber-400/50 animate-pulse';
+                    badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping mr-1"></span> ⏸️ Paused';
+                } else {
+                    card.className = 'stage-step-card p-3.5 rounded-xl border border-gray-800 bg-gray-950/60 text-gray-500 opacity-60 transition-all duration-300';
+                    badge.className = 'px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-gray-400';
+                    badge.textContent = 'Waiting for Resume';
+                }
+            }
+            return;
+        }
+
+        if (stageNum >= 7) {
+            if (bar) bar.style.width = '100%';
+            if (progressText) progressText.textContent = '100% (Completed)';
+            if (statusBadge) {
+                statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                statusBadge.innerHTML = '✓ All 6 Stages Completed';
+            }
+        } else {
+            const pct = Math.round(((stageNum - 0.5) / totalStages) * 100);
+            if (bar) bar.style.width = `${pct}%`;
+            if (progressText) progressText.textContent = `Stage ${stageNum} of 6 (${pct}%)`;
+            if (statusBadge) {
+                statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/40 animate-pulse';
+                statusBadge.innerHTML = `<span class="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping mr-1"></span> Processing Stage ${stageNum}...`;
+            }
+        }
+
+        for (let i = 1; i <= totalStages; i++) {
+            const card = document.getElementById(`stage-card-${i}`);
+            const badge = document.getElementById(`stage-badge-${i}`);
+            if (!card || !badge) continue;
+
+            if (i < stageNum || stageNum >= 7) {
+                // Completed
+                card.className = 'stage-step-card p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-950/25 text-emerald-200 transition-all duration-300 shadow-sm';
+                badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                badge.innerHTML = '✓ Done';
+            } else if (i === stageNum) {
+                // Active Now
+                card.className = 'stage-step-card p-3.5 rounded-xl border-2 border-blue-500 bg-blue-950/50 text-blue-100 ring-2 ring-blue-500/30 shadow-lg shadow-blue-500/20 transition-all duration-300 transform scale-[1.02]';
+                badge.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/30 text-blue-200 border border-blue-400/50 animate-pulse';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping mr-1"></span> Active';
+            } else {
+                // Waiting
+                card.className = 'stage-step-card p-3.5 rounded-xl border border-gray-800 bg-gray-950/60 text-gray-500 opacity-60 transition-all duration-300';
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-gray-400';
+                badge.textContent = 'Waiting';
+            }
+        }
+    }
+
+    function initStageObserver() {
+        const feed = document.getElementById('events-feed');
+        if (!feed) return;
+
+        const observer = new MutationObserver((mutations) => {
+            for (const m of mutations) {
+                for (const node of m.addedNodes) {
+                    if (node.nodeType === 1) {
+                        const st = node.getAttribute('data-stage');
+                        const evType = node.getAttribute('data-type');
+                        if (evType === 'PIPELINE_PAUSED') {
+                            updatePipelineStage('validate', false, true);
+                        } else if (st) {
+                            updatePipelineStage(st, evType === 'RUN_COMPLETED', false);
+                        }
+                    }
+                }
+            }
+        });
+        observer.observe(feed, { childList: true });
+    }
+
+    document.addEventListener('DOMContentLoaded', initStageObserver);
+    document.addEventListener('htmx:afterSwap', function(evt) {
+        initStageObserver();
+    });
+</script>
+{% endblock %}

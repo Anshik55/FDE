@@ -1,0 +1,68 @@
+entity: employee
+fields:
+  employee_id:
+    type: string
+    required: true
+    identity: true
+    pattern: '^E\d{4}$'
+    description: "Unique employee identifier starting with E followed by 4 digits (e.g. E1001)"
+  first_name:
+    type: string
+    required: true
+    description: "Employee first name"
+  last_name:
+    type: string
+    required: true
+    description: "Employee last name"
+  email:
+    type: email
+    required: true
+    identity: true
+    description: "Primary work email address"
+  phone:
+    type: phone
+    required: false
+    description: "Contact phone number (normalized to E.164)"
+  date_of_birth:
+    type: date
+    required: false
+    sensitive: true
+    description: "Date of birth (YYYY-MM-DD)"
+  hire_date:
+    type: date
+    required: true
+    description: "Official joining or hire date (YYYY-MM-DD)"
+  department:
+    type: enum
+    required: true
+    description: "Department or organizational unit"
+    values:
+      Engineering: ["eng", "engg", "tech", "software", "development"]
+      HR: ["human resources", "people ops", "people operations", "personnel"]
+      Finance: ["fin", "accounts", "accounting", "treasury"]
+      Sales: ["sales & marketing", "sales", "business development", "marketing"]
+      Operations: ["ops", "logistics", "supply chain"]
+  job_title:
+    type: string
+    required: false
+    description: "Job title or designation (free text, casing/whitespace fixed)"
+  manager_id:
+    type: string
+    required: false
+    references: employee_id
+    pattern: '^E\d{4}$'
+    description: "Employee ID of direct reporting manager"
+  employment_status:
+    type: enum
+    required: true
+    description: "Current employment status"
+    values:
+      Active: ["active", "act", "current", "employed"]
+      Terminated: ["terminated", "resigned", "exited", "left", "inactive"]
+      "On Leave": ["on leave", "leave", "sabbatical"]
+  salary:
+    type: decimal
+    required: false
+    sensitive: true
+    min: 0
+    description: "Annual gross salary"

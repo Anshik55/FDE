@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-white tracking-tight">Human-in-the-Loop Review Queue</h2>
+            <p class="text-sm text-gray-400 mt-0.5">
+                The agent only surfaces decisions with genuine ambiguity or high blast radius. Resolutions are remembered as rules.
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                {{ escalations|selectattr('status', 'equalto', 'pending')|list|length }} Pending Items
+            </span>
+            <a href="/" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-medium rounded-lg border border-gray-700 transition">
+                &larr; Back to Run Monitor
+            </a>
+        </div>
+    </div>
+
+    <!-- Paused Notification & Resume Control -->
+    {% if is_paused %}
+    <div id="queue-resume-banner" class="bg-amber-950/40 border-2 border-amber-500/50 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg shadow-amber-950/40">
+        <div class="flex items-center gap-3">
+            <span class="relative flex h-3 w-3 shrink-0">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+            </span>
+            <div>
+                <h4 class="text-sm font-bold text-amber-200 flex items-center gap-2">
+                    ⏸️ Pipeline Paused for Human Decisions
+                    <span class="text-xs font-mono font-normal text-amber-400">({{ run_id }})</span>
+                </h4>
+                <p class="text-xs text-amber-300/80 mt-0.5">
+                    Resolve the items below. When you're ready, click Resume to execute Stage 6 (Darwinbox Target API Push).
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <button 
+                type="button"
+                hx-post="/api/pipeline/resume/{{ run_id }}"
+                hx-target="#queue-resume-banner"
+                hx-swap="outerHTML"
+                class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition cursor-pointer">
+                <span>▶ Resume Migration Pipeline</span>
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Escalation Cards Container -->
+    <div class="space-y-4" id="queue-container">
+        {% for esc in escalations %}
+        <div id="esc-card-{{ esc.id }}" class="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm space-y-4 {% if esc.status != 'pending' %}opacity-60 bg-gray-950{% endif %}">
+            <div class="flex items-start justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider 
+                            {% if 'MAPPING' in esc.type %}bg-blue-500/20 text-blue-400 border border-blue-500/30
+                            {% elif 'DATE' in esc.type %}bg-purple-500/20 text-purple-400 border border-purple-500/30
+                            {% elif 'CONFLICT' in esc.type %}bg-red-500/20 text-red-400 border border-red-500/30
+                            {% else %}bg-amber-500/20 text-amber-400 border border-amber-500/30{% endif %}">
+                            {{ esc.type }}
+                        </span>
+                        <span class="text-xs text-gray-500 font-mono">Group: {{ esc.group_key }}</span>
+                        {% if esc.status == 'resolved' %}
+                        <span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            ✓ Resolved ({{ esc.resolution.action }})
+                        </span>
+                        {% endif %}
+                    </div>
+                    <h3 class="text-base font-bold text-white">{{ esc.context.title }}</h3>
+                </div>
+                <div class="text-xs text-gray-400 text-right">
+                    <div>Impact: <span class="text-gray-200 font-semibold">{{ esc.affected_count }} records</span></div>
+                    <div class="text-gray-500 text-[11px] mt-0.5">{{ esc.created_at[11:19] }} UTC</div>
+                </div>
+            </div>
+
+            <!-- Evidence Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-950/70 p-3.5 rounded-lg border border-gray-800/80 text-xs">
+                <div>
+                    <span class="text-gray-400 font-semibold block mb-1.5 uppercase tracking-wider text-[10px]">Observable Evidence & Sample Values:</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        {% for s in esc.context.sample_values %}
+                        <span class="px-2 py-1 rounded bg-gray-800 text-gray-200 font-mono">{{ s }}</span>
+                        {% else %}
+                        <span class="text-gray-500 italic">No sample values available</span>
+                        {% endfor %}
+                    </div>
+                    {% if esc.context.error %}
+                    <div class="mt-2 text-red-400 font-mono text-[11px]">
+                        Error: {{ esc.context.error }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <span class="text-gray-400 font-semibold block mb-1.5 uppercase tracking-wider text-[10px]">Agent Proposal:</span>
+                    <div class="p-2.5 rounded bg-blue-950/40 border border-blue-800/40 text-blue-200">
+                        {% if esc.proposal %}
+                        <div class="font-semibold text-white">Suggested: {{ esc.proposal.target_field or esc.proposal.action or esc.proposal.canonical_value }}</div>
+                        {% if esc.proposal.confidence %}
+                        <div class="text-blue-300 text-[11px] mt-0.5">Calculated score: {{ "%.2f"|format(esc.proposal.confidence) }}</div>
+                        {% endif %}
+                        {% if esc.proposal.rationale %}
+                        <div class="text-gray-300 text-[11px] mt-1 italic">"{{ esc.proposal.rationale }}"</div>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-gray-400">Human confirmation required</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons Form -->
+            {% if esc.status == 'pending' %}
+            <form 
+                hx-post="/api/escalations/{{ esc.id }}/resolve" 
+                hx-target="#esc-card-{{ esc.id }}" 
+                hx-swap="outerHTML"
+                class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-gray-800/80">
+                <div class="flex items-center gap-4 text-xs text-gray-300">
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" name="apply_to_group" checked class="rounded bg-gray-800 border-gray-700 text-blue-600 focus:ring-0">
+                        Apply to all {{ esc.affected_count }} affected rows
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" name="remember" checked class="rounded bg-gray-800 border-gray-700 text-blue-600 focus:ring-0">
+                        Remember as rule for this client
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <!-- Approve Button -->
+                    <button 
+                        type="submit" 
+                        name="action" 
+                        value="approve" 
+                        class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-lg transition active:scale-95 shadow-sm shadow-emerald-600/20 cursor-pointer">
+                        ✓ Approve Proposal
+                    </button>
+
+                    <!-- Correct Dropdown/Input -->
+                    <div class="flex items-center gap-1">
+                        {% if 'MAPPING' in esc.type %}
+                        <select name="correct_value" class="bg-gray-800 border border-gray-700 text-gray-200 text-xs rounded-lg px-2 py-1.5">
+                            <option value="employee_id">Correct to: employee_id</option>
+                            <option value="manager_id">Correct to: manager_id</option>
+                        </select>
+                        {% else %}
+                        <input type="text" name="correct_value" placeholder="Enter correction..." class="bg-gray-800 border border-gray-700 text-gray-200 text-xs rounded-lg px-2.5 py-1.5 w-36">
+                        {% endif %}
+                        <button 
+                            type="submit" 
+                            name="action" 
+                            value="correct" 
+                            class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-200 font-semibold text-xs rounded-lg transition active:scale-95 cursor-pointer">
+                            Correct
+                        </button>
+                    </div>
+
+                    <!-- Reject Button -->
+                    <button 
+                        type="submit" 
+                        name="action" 
+                        value="reject" 
+                        class="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 text-red-300 font-semibold text-xs rounded-lg transition active:scale-95 cursor-pointer">
+                        Reject
+                    </button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="text-center py-16 bg-gray-900 border border-gray-800 rounded-xl">
+            <div class="text-3xl mb-2">🎉</div>
+            <h3 class="text-base font-bold text-white">Escalation Queue is Empty</h3>
+            <p class="text-xs text-gray-400 mt-1 max-w-sm mx-auto">
+                No active ambiguities detected. All data mappings and transformations are currently verified and running autonomously.
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
